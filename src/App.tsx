@@ -8,7 +8,7 @@ import CopiesList from "./pages/CopiesList"
 import CopyDetail from "./pages/CopyDetail"
 import Library from "./pages/Library"
 import AdTypes from "./pages/AdTypes"
-import HooksLibrary from "./pages/HooksLibrary"
+import HooksPage from "./pages/HooksPage"
 import Templates from "./pages/Templates"
 import SettingsPage from "./pages/Settings"
 
@@ -23,7 +23,7 @@ function App() {
         <Route path="/copies/:id" element={<CopyDetail />} />
         <Route path="/library" element={<Library />} />
         <Route path="/ad-types" element={<AdTypes />} />
-        <Route path="/hooks-library" element={<HooksLibrary />} />
+        <Route path="/hooks-library" element={<HooksPage />} />
         <Route path="/templates" element={<Templates />} />
         <Route path="/settings" element={<SettingsPage />} />
       </Route>

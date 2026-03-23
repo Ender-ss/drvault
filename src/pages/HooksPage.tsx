@@ -38,7 +38,7 @@ const initialHooks: SavedHook[] = [
   }
 ]
 
-export default function HooksLibrary() {
+export default function HooksPage() {
   const [hooks, setHooks] = useState<SavedHook[]>(initialHooks)
   const [searchTerm, setSearchTerm] = useState("")
   const [showModal, setShowModal] = useState(false)
