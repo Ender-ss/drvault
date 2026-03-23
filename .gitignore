@@ -26,6 +26,7 @@ dist-ssr
 # Project specific exclusions
 temp_docx
 *.html
+!index.html
 *.docx
 extract_media.py
 process_json.py
