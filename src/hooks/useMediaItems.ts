@@ -23,7 +23,19 @@ export function useMediaItems() {
     }
 
     if (data && data.length > 0) {
-      setMediaItems(data)
+      // Map database snake_case to frontend camelCase
+      const mappedItems: MediaItem[] = data.map(item => ({
+        id: item.id,
+        title: item.title,
+        thumbUrl: item.thumb_url,
+        driveLink: item.drive_link,
+        tags: item.tags || [],
+        niche: item.niche,
+        category: item.category,
+        brollType: item.broll_type,
+        isFavorite: item.is_favorite
+      }))
+      setMediaItems(mappedItems)
     } else {
       setMediaItems(initialMediaItems)
     }
@@ -38,21 +50,49 @@ export function useMediaItems() {
     if (!user) return
     const { error } = await supabase
       .from('media_items')
-      .insert([{ ...item, user_id: user.id }])
+      .insert([{
+        title: item.title,
+        thumb_url: item.thumbUrl,
+        drive_link: item.driveLink,
+        niche: item.niche,
+        tags: item.tags,
+        category: item.category,
+        broll_type: item.brollType,
+        is_favorite: item.isFavorite,
+        user_id: user.id
+      }])
 
-    if (error) console.error('Error adding item:', error)
-    else fetchItems()
+    if (error) {
+      console.error('Error adding item:', error)
+      alert('Erro ao salvar no banco de dados. Verifique se as tabelas foram criadas: ' + error.message)
+    } else {
+      fetchItems()
+    }
   }
 
   const updateMediaItem = async (item: MediaItem) => {
     if (!user) return
     const { error } = await supabase
       .from('media_items')
-      .update(item)
+      .update({
+        title: item.title,
+        thumb_url: item.thumbUrl,
+        drive_link: item.driveLink,
+        niche: item.niche,
+        tags: item.tags,
+        category: item.category,
+        broll_type: item.brollType,
+        is_favorite: item.isFavorite
+      })
       .eq('id', item.id)
+      .eq('user_id', user.id)
 
-    if (error) console.error('Error updating item:', error)
-    else fetchItems()
+    if (error) {
+      console.error('Error updating item:', error)
+      alert('Erro ao atualizar: ' + error.message)
+    } else {
+      fetchItems()
+    }
   }
 
   const deleteMediaItem = async (id: string) => {
@@ -61,6 +101,7 @@ export function useMediaItems() {
       .from('media_items')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) console.error('Error deleting item:', error)
     else fetchItems()
@@ -68,10 +109,23 @@ export function useMediaItems() {
 
   const batchUpdateMediaItems = async (ids: string[], updates: Partial<MediaItem>) => {
     if (!user) return
+    
+    // Map updates to snake_case
+    const dbUpdates: any = {}
+    if (updates.title) dbUpdates.title = updates.title
+    if (updates.thumbUrl) dbUpdates.thumb_url = updates.thumbUrl
+    if (updates.driveLink) dbUpdates.drive_link = updates.driveLink
+    if (updates.niche) dbUpdates.niche = updates.niche
+    if (updates.tags) dbUpdates.tags = updates.tags
+    if (updates.category) dbUpdates.category = updates.category
+    if (updates.brollType) dbUpdates.broll_type = updates.brollType
+    if (updates.isFavorite !== undefined) dbUpdates.is_favorite = updates.isFavorite
+
     const { error } = await supabase
       .from('media_items')
-      .update(updates)
+      .update(dbUpdates)
       .in('id', ids)
+      .eq('user_id', user.id)
 
     if (error) console.error('Error batch updating:', error)
     else fetchItems()

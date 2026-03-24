@@ -70,7 +70,7 @@ export function useCopies() {
         id: row.id,
         user_id: row.user_id,
         title: row.title,
-        niche: row.niche,
+        niche: row.category || row.niche, // Use category column from DB
         status: row.status
       }))
       setCopies(mappedCopies as ExtendedCopy[])
@@ -90,14 +90,18 @@ export function useCopies() {
       .from('copies')
       .insert([{
         title: copy.title,
-        niche: copy.niche,
+        category: copy.niche, // DB uses 'category' column
         status: copy.status,
         user_id: user.id,
         data: copy
       }])
 
-    if (error) console.error('Error adding copy:', error)
-    else fetchCopies()
+    if (error) {
+      console.error('Error adding copy:', error)
+      alert('Erro ao criar copy: ' + error.message)
+    } else {
+      fetchCopies()
+    }
   }
 
   const updateCopy = async (id: string, updates: Partial<ExtendedCopy>) => {
@@ -113,14 +117,19 @@ export function useCopies() {
       .from('copies')
       .update({
         title: updatedCopy.title,
-        niche: updatedCopy.niche,
+        category: updatedCopy.niche, // DB uses 'category' column
         status: updatedCopy.status,
         data: updatedCopy
       })
       .eq('id', id)
+      .eq('user_id', user.id)
 
-    if (error) console.error('Error updating copy:', error)
-    else fetchCopies()
+    if (error) {
+      console.error('Error updating copy:', error)
+      alert('Erro ao atualizar copy: ' + error.message)
+    } else {
+      fetchCopies()
+    }
   }
 
   const deleteCopy = async (id: string) => {
@@ -129,6 +138,7 @@ export function useCopies() {
       .from('copies')
       .delete()
       .eq('id', id)
+      .eq('user_id', user.id)
 
     if (error) console.error('Error deleting copy:', error)
     else fetchCopies()
