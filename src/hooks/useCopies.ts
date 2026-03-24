@@ -85,27 +85,40 @@ export function useCopies() {
   }, [user])
 
   const addCopy = async (copy: ExtendedCopy) => {
-    if (!user) return
-    const { error } = await supabase
+    if (!user) return null
+    
+    // Create payload WITHOUT 'id' so Supabase generates a UUID
+    const payload = {
+      title: copy.title,
+      category: copy.niche, // DB uses 'category' column
+      status: copy.status,
+      user_id: user.id,
+      data: copy
+    }
+
+    const { data, error } = await supabase
       .from('copies')
-      .insert([{
-        title: copy.title,
-        category: copy.niche, // DB uses 'category' column
-        status: copy.status,
-        user_id: user.id,
-        data: copy
-      }])
+      .insert([payload])
+      .select()
 
     if (error) {
       console.error('Error adding copy:', error)
       alert('Erro ao criar copy: ' + error.message)
+      return null
     } else {
-      fetchCopies()
+      await fetchCopies()
+      return data?.[0] as ExtendedCopy
     }
   }
 
   const updateCopy = async (id: string, updates: Partial<ExtendedCopy>) => {
     if (!user) return
+
+    // Prevent updating mock items (IDs like '1', '2', '3')
+    if (id.length < 10) { // UUIDs are long, mock IDs are short strings
+      alert('Este é um item de exemplo e não pode ser editado no banco de dados. Crie um novo primeiro!')
+      return
+    }
     
     // Get current copy to merge updates
     const currentCopy = copies.find(c => c.id === id)

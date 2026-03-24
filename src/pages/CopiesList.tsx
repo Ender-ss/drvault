@@ -20,10 +20,9 @@ export default function CopiesList() {
   const [newFunnel, setNewFunnel] = useState("")
   const [newAuthor, setNewAuthor] = useState("")
 
-  const handleCreateCopy = () => {
+  const handleCreateCopy = async () => {
     if (!newTitle.trim()) return
-    const newCopy: ExtendedCopy = {
-      id: String(Date.now()),
+    const newCopyData: any = {
       title: newTitle,
       status: "Draft",
       niche: newNiche || "Geral",
@@ -49,13 +48,15 @@ export default function CopiesList() {
       }]
     }
     
-    addCopy(newCopy)
-    setShowModal(false)
-    setNewTitle("")
-    setNewNiche("")
-    setNewFunnel("")
-    setNewAuthor("")
-    navigate(`/copies/${newCopy.id}`)
+    const createdCopy = await addCopy(newCopyData as ExtendedCopy)
+    if (createdCopy) {
+      setShowModal(false)
+      setNewTitle("")
+      setNewNiche("")
+      setNewFunnel("")
+      setNewAuthor("")
+      navigate(`/copies/${createdCopy.id}`)
+    }
   }
 
   const filtered = copies.filter(c =>

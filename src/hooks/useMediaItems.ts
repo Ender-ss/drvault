@@ -47,31 +47,58 @@ export function useMediaItems() {
   }, [user])
 
   const addMediaItem = async (item: MediaItem) => {
-    if (!user) return
-    const { error } = await supabase
+    if (!user) return null
+    
+    // Create payload WITHOUT 'id' so Supabase generates a UUID
+    const payload = {
+      title: item.title,
+      thumb_url: item.thumbUrl,
+      drive_link: item.driveLink,
+      niche: item.niche,
+      tags: item.tags,
+      category: item.category,
+      broll_type: item.brollType,
+      is_favorite: item.isFavorite,
+      user_id: user.id
+    }
+
+    const { data, error } = await supabase
       .from('media_items')
-      .insert([{
-        title: item.title,
-        thumb_url: item.thumbUrl,
-        drive_link: item.driveLink,
-        niche: item.niche,
-        tags: item.tags,
-        category: item.category,
-        broll_type: item.brollType,
-        is_favorite: item.isFavorite,
-        user_id: user.id
-      }])
+      .insert([payload])
+      .select()
 
     if (error) {
       console.error('Error adding item:', error)
-      alert('Erro ao salvar no banco de dados. Verifique se as tabelas foram criadas: ' + error.message)
+      alert('Erro ao salvar no banco: ' + error.message)
+      return null
     } else {
-      fetchItems()
+      await fetchItems()
+      if (data && data[0]) {
+        return {
+          id: data[0].id,
+          title: data[0].title,
+          thumbUrl: data[0].thumb_url,
+          driveLink: data[0].drive_link,
+          tags: data[0].tags || [],
+          niche: data[0].niche,
+          category: data[0].category,
+          brollType: data[0].broll_type,
+          isFavorite: data[0].is_favorite
+        } as MediaItem
+      }
+      return null
     }
   }
 
   const updateMediaItem = async (item: MediaItem) => {
     if (!user) return
+
+    // Prevent updating mock items (IDs like 'm1' or 'ext_1')
+    if (item.id.startsWith('m') || item.id.startsWith('ext')) {
+      alert('Este é um item de exemplo e não pode ser editado no banco de dados. Crie um novo item primeiro!')
+      return
+    }
+
     const { error } = await supabase
       .from('media_items')
       .update({
