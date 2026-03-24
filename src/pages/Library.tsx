@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy } from "lucide-react"
+import { useState, useRef } from "react"
+import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload } from "lucide-react"
 import { Badge } from "../components/ui/Badge"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
@@ -10,7 +10,15 @@ import { ManageColorsModal } from "../components/editor/ManageColorsModal"
 import { BatchEditModal } from "../components/editor/BatchEditModal"
 
 export default function Library() {
-  const { mediaItems, addMediaItem, updateMediaItem, deleteMediaItem, batchUpdateMediaItems, batchDeleteMediaItems } = useMediaItems()
+  const { 
+    mediaItems, 
+    addMediaItem, 
+    updateMediaItem, 
+    deleteMediaItem, 
+    batchUpdateMediaItems, 
+    batchDeleteMediaItems,
+    uploadThumbnail 
+  } = useMediaItems()
   const [searchTerm, setSearchTerm] = useState("")
   const [filterTag, setFilterTag] = useState<string>("Todos")
   const [filterCategory, setFilterCategory] = useState<string>("Todos")
@@ -33,6 +41,8 @@ export default function Library() {
   const [formTags, setFormTags] = useState("")
   const [formCategory, setFormCategory] = useState("broll")
   const [formBrollType, setFormBrollType] = useState("")
+  const [isUploading, setIsUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Unique values for filters
   const allTags = [...new Set(mediaItems.flatMap(m => m.tags))]
@@ -105,6 +115,23 @@ export default function Library() {
       addMediaItem(newItem)
     }
     setShowModal(false)
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsUploading(true)
+    try {
+      const url = await uploadThumbnail(file)
+      if (url) {
+        setFormThumbUrl(url)
+      }
+    } finally {
+      setIsUploading(false)
+      // Reset input
+      if (fileInputRef.current) fileInputRef.current.value = ""
+    }
   }
 
   const handleDelete = (id: string) => {
@@ -284,10 +311,46 @@ export default function Library() {
               </div>
               <div>
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Thumbnail (URL da imagem)</label>
-                <Input placeholder="https://... ou deixe vazio para gerar automaticamente" value={formThumbUrl} onChange={e => setFormThumbUrl(e.target.value)} />
+                <div className="flex gap-2 mb-2">
+                  <Input 
+                    placeholder="https://... ou faça upload" 
+                    value={formThumbUrl} 
+                    onChange={e => setFormThumbUrl(e.target.value)} 
+                    className="flex-1"
+                  />
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={isUploading}
+                    className="shrink-0"
+                    type="button"
+                  >
+                    <Upload className="w-4 h-4 mr-1.5" />
+                    {isUploading ? "Enviando..." : "Upload"}
+                  </Button>
+                </div>
+                
                 {formThumbUrl && (
-                  <div className="mt-2 rounded-md overflow-hidden border border-[var(--color-border)] w-24 h-24">
-                    <img src={formThumbUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/fallback/300/400' }} />
+                  <div className="relative group/thumb w-24 h-24">
+                    <div className="rounded-md overflow-hidden border border-[var(--color-border)] w-full h-full">
+                      <img src={formThumbUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/fallback/300/400' }} />
+                    </div>
+                    <button 
+                      onClick={() => setFormThumbUrl("")}
+                      className="absolute -top-1.5 -right-1.5 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/thumb:opacity-100 transition-opacity shadow-lg"
+                      title="Remover imagem"
+                      type="button"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
                   </div>
                 )}
                 {!formThumbUrl && (

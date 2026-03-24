@@ -169,5 +169,38 @@ export function useMediaItems() {
     else fetchItems()
   }
 
-  return { mediaItems, isLoaded, addMediaItem, updateMediaItem, deleteMediaItem, batchUpdateMediaItems, batchDeleteMediaItems }
+  const uploadThumbnail = async (file: File): Promise<string | null> => {
+    if (!user) return null
+    
+    const fileExt = file.name.split('.').pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    const filePath = `${user.id}/${fileName}`
+
+    const { error: uploadError } = await supabase.storage
+      .from('thumbnails')
+      .upload(filePath, file)
+
+    if (uploadError) {
+      console.error('Error uploading thumbnail:', uploadError)
+      alert('Erro ao carregar imagem: ' + uploadError.message)
+      return null
+    }
+
+    const { data } = supabase.storage
+      .from('thumbnails')
+      .getPublicUrl(filePath)
+
+    return data.publicUrl
+  }
+
+  return { 
+    mediaItems, 
+    isLoaded, 
+    addMediaItem, 
+    updateMediaItem, 
+    deleteMediaItem, 
+    batchUpdateMediaItems, 
+    batchDeleteMediaItems,
+    uploadThumbnail
+  }
 }
