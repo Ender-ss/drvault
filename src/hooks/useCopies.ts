@@ -70,7 +70,7 @@ export function useCopies() {
         id: row.id,
         user_id: row.user_id,
         title: row.title,
-        category: row.category,
+        niche: row.niche,
         status: row.status
       }))
       setCopies(mappedCopies as ExtendedCopy[])
@@ -90,7 +90,7 @@ export function useCopies() {
       .from('copies')
       .insert([{
         title: copy.title,
-        category: copy.category,
+        niche: copy.niche,
         status: copy.status,
         user_id: user.id,
         data: copy
@@ -113,7 +113,7 @@ export function useCopies() {
       .from('copies')
       .update({
         title: updatedCopy.title,
-        category: updatedCopy.category,
+        niche: updatedCopy.niche,
         status: updatedCopy.status,
         data: updatedCopy
       })
