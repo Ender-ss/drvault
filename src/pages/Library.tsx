@@ -17,7 +17,8 @@ export default function Library() {
     deleteMediaItem, 
     batchUpdateMediaItems, 
     batchDeleteMediaItems,
-    uploadThumbnail 
+    uploadThumbnail,
+    toggleFavorite
   } = useMediaItems()
   const [searchTerm, setSearchTerm] = useState("")
   const [filterTag, setFilterTag] = useState<string>("Todos")
@@ -252,7 +253,7 @@ export default function Library() {
               )}
               {/* Hover actions */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <button onClick={(e) => { e.stopPropagation(); updateMediaItem({ ...media, isFavorite: !media.isFavorite }) }} className={`p-2 bg-[var(--color-surface)] rounded-full transition-colors ${media.isFavorite ? 'hover:bg-yellow-600' : 'hover:bg-[var(--color-surface-hover)]'}`} title={media.isFavorite ? "Remover dos favoritos" : "Favoritar"}>
+                <button onClick={(e) => { e.stopPropagation(); toggleFavorite(media.id, !!media.isFavorite) }} className={`p-2 bg-[var(--color-surface)] rounded-full transition-colors ${media.isFavorite ? 'hover:bg-yellow-600' : 'hover:bg-[var(--color-surface-hover)]'}`} title={media.isFavorite ? "Remover dos favoritos" : "Favoritar"}>
                   <Star className={`w-4 h-4 ${media.isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-white'}`} />
                 </button>
                 <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(media.driveLink); }} className="p-2 bg-[var(--color-surface)] rounded-full hover:bg-blue-600 transition-colors" title="Copiar Link">

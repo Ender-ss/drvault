@@ -12,19 +12,32 @@ export function useMediaItems() {
     if (!user) return
     setIsLoaded(false)
     
-    const { data, error } = await supabase
+    // 1. Fetch all media items (Shared)
+    const { data: itemsData, error: itemsError } = await supabase
       .from('media_items')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (error) {
-      console.error('Error fetching media items:', error)
+    if (itemsError) {
+      console.error('Error fetching media items:', itemsError)
       return
     }
 
-    if (data && data.length > 0) {
+    // 2. Fetch user favorites (Individual)
+    const { data: favsData, error: favsError } = await supabase
+      .from('user_favorites')
+      .select('media_item_id')
+      .eq('user_id', user.id)
+
+    if (favsError) {
+      console.error('Error fetching favorites:', favsError)
+    }
+
+    const favoriteIds = new Set(favsData?.map(f => f.media_item_id) || [])
+
+    if (itemsData && itemsData.length > 0) {
       // Map database snake_case to frontend camelCase
-      const mappedItems: MediaItem[] = data.map(item => ({
+      const mappedItems: MediaItem[] = itemsData.map(item => ({
         id: item.id,
         title: item.title,
         thumbUrl: item.thumb_url,
@@ -33,7 +46,7 @@ export function useMediaItems() {
         niche: item.niche,
         category: item.category,
         brollType: item.broll_type,
-        isFavorite: item.is_favorite
+        isFavorite: favoriteIds.has(item.id)
       }))
       setMediaItems(mappedItems)
     } else {
@@ -108,11 +121,9 @@ export function useMediaItems() {
         niche: item.niche,
         tags: item.tags,
         category: item.category,
-        broll_type: item.brollType,
-        is_favorite: item.isFavorite
+        broll_type: item.brollType
       })
       .eq('id', item.id)
-      .eq('user_id', user.id)
 
     if (error) {
       console.error('Error updating item:', error)
@@ -128,7 +139,6 @@ export function useMediaItems() {
       .from('media_items')
       .delete()
       .eq('id', id)
-      .eq('user_id', user.id)
 
     if (error) console.error('Error deleting item:', error)
     else fetchItems()
@@ -146,13 +156,11 @@ export function useMediaItems() {
     if (updates.tags) dbUpdates.tags = updates.tags
     if (updates.category) dbUpdates.category = updates.category
     if (updates.brollType) dbUpdates.broll_type = updates.brollType
-    if (updates.isFavorite !== undefined) dbUpdates.is_favorite = updates.isFavorite
 
     const { error } = await supabase
       .from('media_items')
       .update(dbUpdates)
       .in('id', ids)
-      .eq('user_id', user.id)
 
     if (error) console.error('Error batch updating:', error)
     else fetchItems()
@@ -169,12 +177,36 @@ export function useMediaItems() {
     else fetchItems()
   }
 
+  const toggleFavorite = async (mediaItemId: string, currentStatus: boolean) => {
+    if (!user) return
+
+    if (currentStatus) {
+      // Remove from favorites
+      const { error } = await supabase
+        .from('user_favorites')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('media_item_id', mediaItemId)
+      
+      if (error) console.error('Error removing favorite:', error)
+    } else {
+      // Add to favorites
+      const { error } = await supabase
+        .from('user_favorites')
+        .insert([{ user_id: user.id, media_item_id: mediaItemId }])
+      
+      if (error) console.error('Error adding favorite:', error)
+    }
+    
+    fetchItems()
+  }
+
   const uploadThumbnail = async (file: File): Promise<string | null> => {
     if (!user) return null
     
     const fileExt = file.name.split('.').pop()
     const fileName = `${Math.random()}.${fileExt}`
-    const filePath = `${user.id}/${fileName}`
+    const filePath = `shared/${fileName}`
 
     const { error: uploadError } = await supabase.storage
       .from('thumbnails')
@@ -201,6 +233,7 @@ export function useMediaItems() {
     deleteMediaItem, 
     batchUpdateMediaItems, 
     batchDeleteMediaItems,
-    uploadThumbnail
+    uploadThumbnail,
+    toggleFavorite
   }
 }
