@@ -1,6 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { mockCopies, type Copy } from '../data/mock'
 import { type Annotation } from '../components/editor/ScriptEditor'
+import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../lib/supabase'
 
 export interface Hook {
   id: string
@@ -43,61 +45,93 @@ export interface ExtendedCopy extends Copy {
 }
 
 export function useCopies() {
-  const [copies, setCopies] = useState<ExtendedCopy[]>(() => {
-    let baseCopies = mockCopies as ExtendedCopy[]
-    const stored = localStorage.getItem('drvault_copies')
-    if (stored) {
-      try {
-        baseCopies = JSON.parse(stored)
-      } catch (e) {
-        // use mockCopies
-      }
-    }
+  const { user } = useAuth()
+  const [copies, setCopies] = useState<ExtendedCopy[]>([])
+  const [isLoaded, setIsLoaded] = useState(false)
+
+  const fetchCopies = async () => {
+    if (!user) return
+    setIsLoaded(false)
     
-    // Migrate any copy that doesn't have an `ads` array yet
-    return baseCopies.map(c => {
-      if (!c.ads || c.ads.length === 0) {
-        return {
-          ...c,
-          ads: [{
-            id: `ad-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`,
-            title: 'Ad 1',
-            script: c.script || '',
-            scriptEN: c.scriptEN || '',
-            decisionMaking: '',
-            format: '',
-            videoStyle: '',
-            reference: '',
-            briefing: c.briefing || '',
-            briefingEN: c.briefingEN || '',
-            hooks: c.hooks || [],
-            annotations: c.annotations || [],
-            avatarUrl: c.avatarUrl || '',
-            avatarTitle: c.avatarTitle || '',
-            avatarLink: c.avatarLink || ''
-          }]
-        }
-      }
-      return c
-    })
-  })
-  const isLoaded = true
+    const { data, error } = await supabase
+      .from('copies')
+      .select('*')
+      .order('created_at', { ascending: false })
 
-  const saveToStorage = (newCopies: ExtendedCopy[]) => {
-    setCopies(newCopies)
-    localStorage.setItem('drvault_copies', JSON.stringify(newCopies))
+    if (error) {
+      console.error('Error fetching copies:', error)
+      return
+    }
+
+    if (data && data.length > 0) {
+      // Map Supabase rows back to ExtendedCopy
+      const mappedCopies = data.map(row => ({
+        ...row.data,
+        id: row.id,
+        user_id: row.user_id,
+        title: row.title,
+        category: row.category,
+        status: row.status
+      }))
+      setCopies(mappedCopies as ExtendedCopy[])
+    } else {
+      setCopies(mockCopies as ExtendedCopy[])
+    }
+    setIsLoaded(true)
   }
 
-  const addCopy = (copy: ExtendedCopy) => {
-    saveToStorage([copy, ...copies])
+  useEffect(() => {
+    fetchCopies()
+  }, [user])
+
+  const addCopy = async (copy: ExtendedCopy) => {
+    if (!user) return
+    const { error } = await supabase
+      .from('copies')
+      .insert([{
+        title: copy.title,
+        category: copy.category,
+        status: copy.status,
+        user_id: user.id,
+        data: copy
+      }])
+
+    if (error) console.error('Error adding copy:', error)
+    else fetchCopies()
   }
 
-  const updateCopy = (id: string, updates: Partial<ExtendedCopy>) => {
-    saveToStorage(copies.map(c => c.id === id ? { ...c, ...updates } : c))
+  const updateCopy = async (id: string, updates: Partial<ExtendedCopy>) => {
+    if (!user) return
+    
+    // Get current copy to merge updates
+    const currentCopy = copies.find(c => c.id === id)
+    if (!currentCopy) return
+
+    const updatedCopy = { ...currentCopy, ...updates }
+
+    const { error } = await supabase
+      .from('copies')
+      .update({
+        title: updatedCopy.title,
+        category: updatedCopy.category,
+        status: updatedCopy.status,
+        data: updatedCopy
+      })
+      .eq('id', id)
+
+    if (error) console.error('Error updating copy:', error)
+    else fetchCopies()
   }
 
-  const deleteCopy = (id: string) => {
-    saveToStorage(copies.filter(c => c.id !== id))
+  const deleteCopy = async (id: string) => {
+    if (!user) return
+    const { error } = await supabase
+      .from('copies')
+      .delete()
+      .eq('id', id)
+
+    if (error) console.error('Error deleting copy:', error)
+    else fetchCopies()
   }
 
   return { copies, isLoaded, addCopy, updateCopy, deleteCopy }
