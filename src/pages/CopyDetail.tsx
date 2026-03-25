@@ -29,9 +29,9 @@ const defaultHooks: Hook[] = [
 
 export default function CopyDetail() {
   const { id } = useParams()
-  const { copies, updateCopy } = useCopies()
+  const { copies, updateCopy, isLoaded } = useCopies()
   const { mediaItems } = useMediaItems()
-  const copy = copies.find(c => c.id === id) || copies[0]
+  const copy = copies.find(c => c.id === id)
   const { layoutMode } = useLayout()
 
   const [isEditing, setIsEditing] = useState(false)
@@ -77,7 +77,6 @@ export default function CopyDetail() {
   const [avFilterTag, setAvFilterTag] = useState("Todos")
 
   // Script + Annotations
-  // State for editing annotations inline
   const [editingAnnId, setEditingAnnId] = useState<string | null>(null)
   const [editingAnnContent, setEditingAnnContent] = useState("")
   const initialScript = [
@@ -91,25 +90,28 @@ export default function CopyDetail() {
   const [scriptContent, setScriptContent] = useState<string>(activeAd.script || initialScript)
   const [scriptEN, setScriptEN] = useState<string>(activeAd.scriptEN || "")
 
-  // Sync states on tab change
+  // Sync states on tab change OR when copy is first loaded
   useEffect(() => {
-    const newActive = copy?.ads?.find(a => a.id === activeAdId)
-    if (newActive) {
-      setDecisionMaking(newActive.decisionMaking || "")
-      setFormat(newActive.format || "")
-      setVideoStyle(newActive.videoStyle || "")
-      setReference(newActive.reference || "")
-      setBriefing(newActive.briefing || "")
-      setBriefingEN(newActive.briefingEN || "")
-      setHooks(newActive.hooks || [])
-      setAvatarUrl(newActive.avatarUrl || "")
-      setAvatarTitle(newActive.avatarTitle || "")
-      setAvatarLink(newActive.avatarLink || "")
-      setAnnotations(newActive.annotations || [])
-      setScriptContent(newActive.script || "")
-      setScriptEN(newActive.scriptEN || "")
+    const currentAd = copy?.ads?.find(a => a.id === activeAdId) || copy?.ads?.[0]
+    if (currentAd) {
+      setDecisionMaking(currentAd.decisionMaking || "")
+      setFormat(currentAd.format || "")
+      setVideoStyle(currentAd.videoStyle || "")
+      setReference(currentAd.reference || "")
+      setBriefing(currentAd.briefing || "")
+      setBriefingEN(currentAd.briefingEN || "")
+      setHooks(currentAd.hooks || [])
+      setAvatarUrl(currentAd.avatarUrl || "")
+      setAvatarTitle(currentAd.avatarTitle || "")
+      setAvatarLink(currentAd.avatarLink || "")
+      setAnnotations(currentAd.annotations || [])
+      setScriptContent(currentAd.script || "")
+      setScriptEN(currentAd.scriptEN || "")
+      if (!activeAdId || activeAdId === 'ad1') {
+        setActiveAdId(currentAd.id)
+      }
     }
-  }, [activeAdId])
+  }, [activeAdId, copy, isLoaded])
 
   // AI State
   const [isTranslating, setIsTranslating] = useState(false)
@@ -128,6 +130,25 @@ export default function CopyDetail() {
   const [hookToolbar, setHookToolbar] = useState<{ top: number; left: number } | null>(null)
   const [hookActiveForm, setHookActiveForm] = useState<"comment" | "link" | null>(null)
   const [hookFormInput, setHookFormInput] = useState("")
+
+  // EARLY RETURNS (Must be after ALL hooks)
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-brand)]"></div>
+      </div>
+    )
+  }
+
+  if (!copy) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <h2 className="text-xl font-bold">Criativo não encontrado</h2>
+        <p className="text-[var(--color-text-muted)]">O criativo solicitado não existe ou foi excluído.</p>
+        <Button variant="brand" onClick={() => window.history.back()}>Voltar</Button>
+      </div>
+    )
+  }
   const [hookShowBroll, setHookShowBroll] = useState(false)
   const [hookShowColor, setHookShowColor] = useState(false)
   const [hookColor, setHookColor] = useState("#3B82F6")
