@@ -16,14 +16,11 @@ import SettingsPage from "./pages/Settings"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 
-import { ErrorBoundary } from "./components/ErrorBoundary"
-
 function App() {
   useTheme() // Initialize theme on load
 
   return (
-    <ErrorBoundary>
-      <AuthProvider>
+    <AuthProvider>
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -44,7 +41,6 @@ function App() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AuthProvider>
-    </ErrorBoundary>
   )
 }
 

@@ -56,7 +56,6 @@ export function useCopies() {
     }
     
     setIsLoaded(false)
-    console.log('useCopies: Starting fetch for user', user.id)
     
     try {
       const { data, error } = await supabase
@@ -71,7 +70,6 @@ export function useCopies() {
       }
 
       if (data && data.length > 0) {
-        console.log('useCopies: Fetched', data.length, 'copies')
         const mappedCopies = data.map(row => {
           const rowData = row.data && typeof row.data === 'object' ? row.data : {}
           return {
@@ -85,7 +83,6 @@ export function useCopies() {
         })
         setCopies(mappedCopies as ExtendedCopy[])
       } else {
-        console.log('useCopies: No copies found in DB, using mocks')
         setCopies(mockCopies as ExtendedCopy[])
       }
     } catch (err) {
@@ -93,7 +90,6 @@ export function useCopies() {
       setCopies(mockCopies as ExtendedCopy[])
     } finally {
       setIsLoaded(true)
-      console.log('useCopies: Fetch finished, isLoaded set to true')
     }
   }
 
@@ -176,5 +172,5 @@ export function useCopies() {
     }
   }
 
-  return { copies, isLoaded, setIsLoaded, addCopy, updateCopy, deleteCopy, fetchCopies }
+  return { copies, isLoaded, addCopy, updateCopy, deleteCopy, fetchCopies }
 }

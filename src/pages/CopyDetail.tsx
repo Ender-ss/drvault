@@ -29,22 +29,11 @@ const defaultHooks: Hook[] = [
 
 export default function CopyDetail() {
   const { id } = useParams()
-  const { copies, updateCopy, isLoaded, setIsLoaded } = useCopies()
+  const { copies, updateCopy, isLoaded } = useCopies()
   const { mediaItems } = useMediaItems()
   const copy = copies.find(c => c.id === id)
   const { layoutMode } = useLayout()
 
-  // Safety timer to prevent infinite loading
-  useEffect(() => {
-    console.log('CopyDetail: Mounted with isLoaded =', isLoaded)
-    const timer = setTimeout(() => {
-      if (!isLoaded) {
-        console.warn('CopyDetail: Loading timed out after 5s. Forcing isLoaded to true.')
-        setIsLoaded(true)
-      }
-    }, 5000)
-    return () => clearTimeout(timer)
-  }, [isLoaded])
 
   const [isEditing, setIsEditing] = useState(false)
   const [language, setLanguage] = useState<"PT" | "EN">("PT")
