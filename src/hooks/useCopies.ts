@@ -50,41 +50,51 @@ export function useCopies() {
   const [isLoaded, setIsLoaded] = useState(false)
 
   const fetchCopies = async () => {
-    // We still check for user to ensure they are logged in, but we don't filter by user.id
-    if (!user) return
-    setIsLoaded(false)
-    
-    const { data, error } = await supabase
-      .from('copies')
-      .select('*')
-      .order('created_at', { ascending: false })
-
-    if (error) {
-      console.error('Error fetching copies:', error)
-      setCopies(mockCopies as ExtendedCopy[]) // Fallback to mocks on error to prevent crash
-      setIsLoaded(true)
+    if (!user) {
+      console.log('useCopies: No user found, skipping fetch.')
       return
     }
+    
+    setIsLoaded(false)
+    console.log('useCopies: Starting fetch for user', user.id)
+    
+    try {
+      const { data, error } = await supabase
+        .from('copies')
+        .select('*')
+        .order('created_at', { ascending: false })
 
-    if (data && data.length > 0) {
-      // Map Supabase rows back to ExtendedCopy
-      const mappedCopies = data.map(row => {
-        // Ensure row.data is an object we can spread
-        const rowData = row.data && typeof row.data === 'object' ? row.data : {}
-        return {
-          ...rowData,
-          id: row.id,
-          user_id: row.user_id,
-          title: row.title,
-          niche: row.category || row.niche || (rowData as any).niche, 
-          status: row.status
-        }
-      })
-      setCopies(mappedCopies as ExtendedCopy[])
-    } else {
+      if (error) {
+        console.error('useCopies: Supabase error:', error)
+        setCopies(mockCopies as ExtendedCopy[])
+        return
+      }
+
+      if (data && data.length > 0) {
+        console.log('useCopies: Fetched', data.length, 'copies')
+        const mappedCopies = data.map(row => {
+          const rowData = row.data && typeof row.data === 'object' ? row.data : {}
+          return {
+            ...rowData,
+            id: row.id,
+            user_id: row.user_id,
+            title: row.title,
+            niche: row.category || row.niche || (rowData as any).niche, 
+            status: row.status
+          }
+        })
+        setCopies(mappedCopies as ExtendedCopy[])
+      } else {
+        console.log('useCopies: No copies found in DB, using mocks')
+        setCopies(mockCopies as ExtendedCopy[])
+      }
+    } catch (err) {
+      console.error('useCopies: Unexpected crash during fetch:', err)
       setCopies(mockCopies as ExtendedCopy[])
+    } finally {
+      setIsLoaded(true)
+      console.log('useCopies: Fetch finished, isLoaded set to true')
     }
-    setIsLoaded(true)
   }
 
   useEffect(() => {
@@ -166,5 +176,5 @@ export function useCopies() {
     }
   }
 
-  return { copies, isLoaded, addCopy, updateCopy, deleteCopy, fetchCopies }
+  return { copies, isLoaded, setIsLoaded, addCopy, updateCopy, deleteCopy, fetchCopies }
 }
