@@ -143,32 +143,9 @@ export default function CopyDetail() {
   const [hookActiveForm, setHookActiveForm] = useState<"comment" | "link" | null>(null)
   const [hookFormInput, setHookFormInput] = useState("")
 
-  // EARLY RETURNS (Must be after ALL hooks)
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-brand)]"></div>
-      </div>
-    )
-  }
-
-  if (!copy) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <h2 className="text-xl font-bold">Criativo não encontrado</h2>
-        <p className="text-[var(--color-text-muted)]">O criativo solicitado não existe ou foi excluído.</p>
-        <Button variant="brand" onClick={() => window.history.back()}>Voltar</Button>
-      </div>
-    )
-  }
   const [hookShowBroll, setHookShowBroll] = useState(false)
   const [hookShowColor, setHookShowColor] = useState(false)
   const [hookColor, setHookColor] = useState("#3B82F6")
-
-  const getNextRefNumber = () => {
-    const existing = annotations.map(a => a.refNumber || 0)
-    return existing.length > 0 ? Math.max(...existing) + 1 : 1
-  }
 
   useEffect(() => {
     const handleMouseUp = (e: MouseEvent) => {
@@ -192,6 +169,31 @@ export default function CopyDetail() {
     document.addEventListener('mouseup', handleMouseUp)
     return () => document.removeEventListener('mouseup', handleMouseUp)
   }, [hookActiveForm, hookShowBroll, hookShowColor])
+
+  // EARLY RETURNS (Must be after ALL hooks)
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--color-brand)]"></div>
+      </div>
+    )
+  }
+
+  if (!copy) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <h2 className="text-xl font-bold">Criativo não encontrado</h2>
+        <p className="text-[var(--color-text-muted)]">O criativo solicitado não existe ou foi excluído.</p>
+        <Button variant="brand" onClick={() => window.history.back()}>Voltar</Button>
+      </div>
+    )
+  }
+
+  const getNextRefNumber = () => {
+    const existing = annotations.map(a => a.refNumber || 0)
+    return existing.length > 0 ? Math.max(...existing) + 1 : 1
+  }
+
 
   const resetHookToolbar = () => {
     setHookActiveForm(null)
