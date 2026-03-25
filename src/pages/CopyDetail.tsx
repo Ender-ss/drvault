@@ -455,8 +455,10 @@ export default function CopyDetail() {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Badge variant={copy.status === "Validado" ? "success" : "default"}>{copy.status.toLowerCase()}</Badge>
-          <h1 className="text-xl font-bold tracking-tight">{copy.title}</h1>
+          <Badge variant={copy.status === "Validado" ? "success" : "default"}>
+            {copy.status?.toLowerCase() || 'teste'}
+          </Badge>
+          <h1 className="text-xl font-bold tracking-tight">{copy.title || "Sem título"}</h1>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => window.print()}>
@@ -495,15 +497,15 @@ export default function CopyDetail() {
 
       {/* META BAR */}
       <div className="flex items-center gap-2 text-xs text-[var(--color-text-muted)] bg-[var(--color-surface)] p-2 rounded max-w-fit">
-        <span className="font-semibold text-[var(--color-text)]">{copy.niche}</span>
+        <span className="font-semibold text-[var(--color-text)]">{copy.niche || "Geral"}</span>
         <span>•</span>
-        <span>{copy.platform}</span>
+        <span>{copy.platform || "Facebook Ads"}</span>
         <span>•</span>
-        <span>Funil: {copy.funnel}</span>
+        <span>Funil: {copy.funnel || "N/A"}</span>
         <span>•</span>
-        <span>Copy: {copy.authors[0]}</span>
+        <span>Copy: {copy.authors?.[0] || "Equipe"}</span>
         <span>•</span>
-        <span>Editor: {copy.authors[1] || "Equipe"}</span>
+        <span>Editor: {copy.authors?.[1] || "Equipe"}</span>
       </div>
 
       {/* TABS FOR ADS */}
