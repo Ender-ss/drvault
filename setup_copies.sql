@@ -17,6 +17,8 @@ ALTER TABLE public.copies ENABLE ROW LEVEL SECURITY;
 
 -- 3. Criar política para permitir acesso completo a usuários autenticados (Shared Library Philosophy)
 -- Como o usuário solicitou que "o restante tem que ser igual para todos", removemos a restrição de user_id no acesso.
+DROP POLICY IF EXISTS "Allow authenticated users to manage all copies" ON public.copies;
+
 CREATE POLICY "Allow authenticated users to manage all copies"
 ON public.copies
 FOR ALL
