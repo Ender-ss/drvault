@@ -61,7 +61,7 @@ export default function CopyDetail() {
     id: 'ad1', title: 'Ad 1', script: '', scriptEN: '', briefing: defaultBriefing, briefingEN: '',
     hooks: defaultHooks, annotations: [], avatarUrl: '', avatarTitle: '', avatarLink: ''
   }]
-  const [activeAdId, setActiveAdId] = useState<string>(defaultAds[0].id)
+  const [activeAdId, setActiveAdId] = useState<string>(defaultAds?.[0]?.id || 'ad1')
   const activeAd = defaultAds.find(a => a.id === activeAdId) || defaultAds[0]
 
   // Diretrizes / Briefing

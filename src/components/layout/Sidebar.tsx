@@ -57,7 +57,7 @@ export function Sidebar() {
       <div className="mt-auto px-4 pt-6 border-t border-[var(--color-border)]">
         <div className="flex items-center gap-3 px-3 py-3 mb-2">
           <div className="w-8 h-8 rounded-full bg-[var(--color-brand)] flex items-center justify-center text-white font-bold text-xs">
-            {user?.name.charAt(0).toUpperCase()}
+            {user?.name?.[0]?.toUpperCase() || "U"}
           </div>
           <div className="overflow-hidden">
             <p className="text-sm font-semibold truncate text-white">{user?.name}</p>
