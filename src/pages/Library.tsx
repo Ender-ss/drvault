@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play } from "lucide-react"
+import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play, Maximize2 } from "lucide-react"
 import { Badge } from "../components/ui/Badge"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
@@ -9,6 +9,7 @@ import { useMediaItems } from "../hooks/useMediaItems"
 import { ManageColorsModal } from "../components/editor/ManageColorsModal"
 import { BatchEditModal } from "../components/editor/BatchEditModal"
 import { MediaInspectorModal } from "../components/spy/MediaInspectorModal"
+import { parseMediaUrl } from "../utils/embedUtils"
 
 export default function Library() {
   const { 
@@ -33,6 +34,7 @@ export default function Library() {
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
+  const [playingId, setPlayingId] = useState<string | null>(null)
   
   const { colors, isLoaded } = useTagColors()
 
@@ -248,71 +250,179 @@ export default function Library() {
               onClick={(e) => {
                 if (selectedIds.size > 0) {
                   toggleSelection(media.id, e)
-                } else {
-                  setPreviewItem(media)
+                } else if (playingId !== media.id) {
+                  setPlayingId(media.id)
                 }
               }}
             >
-              {/* Batch selection checkbox */}
-              <div 
-                className={`absolute top-2 left-2 z-30 w-5 h-5 rounded flex items-center justify-center border transition-colors cursor-pointer ${selectedIds.has(media.id) ? 'bg-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-black/50 border-white/50 hover:border-white'}`}
-                onClick={(e) => toggleSelection(media.id, e)}
-                title={selectedIds.has(media.id) ? "Desmarcar" : "Selecionar"}
-              >
-                {selectedIds.has(media.id) && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
-              </div>
+              {playingId === media.id ? (
+                <div className="relative w-full h-full bg-black flex items-center justify-center">
+                  {(() => {
+                    const embedInfo = parseMediaUrl(media.driveLink)
+                    if (embedInfo.platform === 'drive' && embedInfo.videoId) {
+                      return (
+                        <iframe
+                          src={`${embedInfo.embedUrl}?autoplay=1`}
+                          className="w-full h-full border-0"
+                          allow="autoplay; encrypted-media; fullscreen"
+                          allowFullScreen
+                          title={media.title}
+                        />
+                      )
+                    }
+                    if (embedInfo.platform === 'youtube' && embedInfo.videoId) {
+                      return (
+                        <iframe
+                          src={embedInfo.embedUrl}
+                          className="w-full h-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={media.title}
+                        />
+                      )
+                    }
+                    if (embedInfo.platform === 'tiktok' && embedInfo.videoId) {
+                      return (
+                        <iframe
+                          src={embedInfo.embedUrl}
+                          className="w-full h-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          title={media.title}
+                        />
+                      )
+                    }
+                    if (embedInfo.platform === 'instagram' && embedInfo.videoId) {
+                      return (
+                        <iframe
+                          src={embedInfo.embedUrl}
+                          className="w-full h-full border-0"
+                          allowFullScreen
+                          title={media.title}
+                        />
+                      )
+                    }
+                    if (
+                      embedInfo.platform === 'direct' &&
+                      (embedInfo.embedUrl.endsWith('.mp4') ||
+                        embedInfo.embedUrl.endsWith('.webm') ||
+                        embedInfo.embedUrl.includes('.mp4?') ||
+                        embedInfo.embedUrl.includes('fbcdn.net') ||
+                        embedInfo.embedUrl.includes('tiktokcdn.com'))
+                    ) {
+                      return (
+                        <video
+                          src={embedInfo.embedUrl}
+                          controls
+                          autoPlay
+                          className="w-full h-full object-contain"
+                        />
+                      )
+                    }
+                    return (
+                      <div className="p-3 text-center space-y-2">
+                        <p className="text-[11px] text-gray-400">Link externo ({embedInfo.platform})</p>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setPreviewItem(media)
+                          }}
+                          className="px-2.5 py-1 bg-[var(--color-brand)] text-white text-xs rounded hover:opacity-90 transition-opacity"
+                        >
+                          Abrir Player
+                        </button>
+                      </div>
+                    )
+                  })()}
 
-              <img 
-                src={media.thumbUrl} 
-                alt={media.title} 
-                referrerPolicy="no-referrer"
-                loading="lazy"
-                onError={(e) => {
-                  const target = e.currentTarget;
-                  if (!target.dataset.fallback) {
-                    target.dataset.fallback = "true";
-                    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(media.title)}&background=1f2329&color=e2e8f0&size=400`;
-                  }
-                }}
-                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-              />
-
-              {media.isFavorite && (
-                <div className="absolute top-2 right-2 text-yellow-400 z-10 filter drop-shadow-md">
-                  <Star className="w-5 h-5 fill-yellow-400" />
+                  {/* Inline controls (Close / Maximize) */}
+                  <div className="absolute top-2 right-2 z-30 flex items-center gap-1">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPreviewItem(media)
+                      }}
+                      className="p-1 rounded bg-black/80 hover:bg-[var(--color-brand)] text-white transition-colors shadow"
+                      title="Tela Cheia / Pop-up"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPlayingId(null)
+                      }}
+                      className="p-1 rounded bg-black/80 hover:bg-red-600 text-white transition-colors shadow"
+                      title="Fechar vídeo / Voltar à imagem"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {/* Batch selection checkbox */}
+                  <div 
+                    className={`absolute top-2 left-2 z-30 w-5 h-5 rounded flex items-center justify-center border transition-colors cursor-pointer ${selectedIds.has(media.id) ? 'bg-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-black/50 border-white/50 hover:border-white'}`}
+                    onClick={(e) => toggleSelection(media.id, e)}
+                    title={selectedIds.has(media.id) ? "Desmarcar" : "Selecionar"}
+                  >
+                    {selectedIds.has(media.id) && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
+                  </div>
+
+                  <img 
+                    src={media.thumbUrl} 
+                    alt={media.title} 
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.dataset.fallback) {
+                        target.dataset.fallback = "true";
+                        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(media.title)}&background=1f2329&color=e2e8f0&size=400`;
+                      }
+                    }}
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                  />
+
+                  {media.isFavorite && (
+                    <div className="absolute top-2 right-2 text-yellow-400 z-10 filter drop-shadow-md">
+                      <Star className="w-5 h-5 fill-yellow-400" />
+                    </div>
+                  )}
+
+                  {/* Central Play Button */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPlayingId(media.id)
+                      }}
+                      className="pointer-events-auto w-11 h-11 rounded-full bg-black/75 hover:bg-[var(--color-brand)] text-white flex items-center justify-center shadow-2xl border border-white/25 hover:border-transparent transition-all transform opacity-85 group-hover:opacity-100 group-hover:scale-110 cursor-pointer z-20"
+                      title="Apertar Play / Assistir Vídeo Diretamente Aqui"
+                    >
+                      <Play className="w-5 h-5 ml-0.5 fill-current text-white" />
+                    </button>
+                  </div>
+
+                  {/* Hover actions at bottom */}
+                  <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/95 via-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 z-20">
+                    <button onClick={(e) => { e.stopPropagation(); toggleFavorite(media.id, !!media.isFavorite) }} className={`p-1.5 bg-[var(--color-surface)] rounded-full transition-colors ${media.isFavorite ? 'hover:bg-yellow-600' : 'hover:bg-[var(--color-surface-hover)]'}`} title={media.isFavorite ? "Remover dos favoritos" : "Favoritar"}>
+                      <Star className={`w-3.5 h-3.5 ${media.isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-white'}`} />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(media.driveLink); }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-blue-600 transition-colors" title="Copiar Link">
+                      <Copy className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); openEditModal(media) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-[var(--color-brand)] transition-colors" title="Editar">
+                      <Edit className="w-3.5 h-3.5" />
+                    </button>
+                    <button onClick={(e) => { e.stopPropagation(); handleDelete(media.id) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-red-600 transition-colors" title="Excluir">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </>
               )}
-
-              {/* Central Play Button */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setPreviewItem(media)
-                  }}
-                  className="pointer-events-auto w-11 h-11 rounded-full bg-black/75 hover:bg-[var(--color-brand)] text-white flex items-center justify-center shadow-2xl border border-white/25 hover:border-transparent transition-all transform opacity-85 group-hover:opacity-100 group-hover:scale-110 cursor-pointer z-20"
-                  title="Apertar Play / Assistir Vídeo"
-                >
-                  <Play className="w-5 h-5 ml-0.5 fill-current text-white" />
-                </button>
-              </div>
-
-              {/* Hover actions at bottom */}
-              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/95 via-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 z-20">
-                <button onClick={(e) => { e.stopPropagation(); toggleFavorite(media.id, !!media.isFavorite) }} className={`p-1.5 bg-[var(--color-surface)] rounded-full transition-colors ${media.isFavorite ? 'hover:bg-yellow-600' : 'hover:bg-[var(--color-surface-hover)]'}`} title={media.isFavorite ? "Remover dos favoritos" : "Favoritar"}>
-                  <Star className={`w-3.5 h-3.5 ${media.isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-white'}`} />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(media.driveLink); }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-blue-600 transition-colors" title="Copiar Link">
-                  <Copy className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); openEditModal(media) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-[var(--color-brand)] transition-colors" title="Editar">
-                  <Edit className="w-3.5 h-3.5" />
-                </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(media.id) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-red-600 transition-colors" title="Excluir">
-                  <Trash2 className="w-3.5 h-3.5" />
-                </button>
-              </div>
             </div>
             <div className="p-3 space-y-1.5 flex-grow bg-[#1f2329]">
               <p className="text-xs font-medium text-[var(--color-text)] truncate" title={media.title}>{media.title}</p>
