@@ -1,5 +1,5 @@
 import { useState, useRef } from "react"
-import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload } from "lucide-react"
+import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play } from "lucide-react"
 import { Badge } from "../components/ui/Badge"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
@@ -8,6 +8,7 @@ import { useTagColors } from "../hooks/useTagColors"
 import { useMediaItems } from "../hooks/useMediaItems"
 import { ManageColorsModal } from "../components/editor/ManageColorsModal"
 import { BatchEditModal } from "../components/editor/BatchEditModal"
+import { MediaInspectorModal } from "../components/spy/MediaInspectorModal"
 
 export default function Library() {
   const { 
@@ -31,6 +32,7 @@ export default function Library() {
   const [showBatchModal, setShowBatchModal] = useState(false)
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   
   const { colors, isLoaded } = useTagColors()
 
@@ -241,10 +243,25 @@ export default function Library() {
           <div key={media.id} className="bg-[#1f2329] rounded-lg overflow-hidden flex flex-col group border transition-colors relative"
             style={{ borderColor: selectedIds.has(media.id) ? 'var(--color-brand)' : 'transparent' }}
           >
-            <div className="aspect-[3/4] bg-black relative overflow-hidden cursor-pointer" onClick={(e) => toggleSelection(media.id, e)}>
-              <div className={`absolute top-2 left-2 z-10 w-5 h-5 rounded flex items-center justify-center border transition-colors ${selectedIds.has(media.id) ? 'bg-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-black/50 border-white/50 group-hover:border-white'}`}>
+            <div 
+              className="aspect-[3/4] bg-black relative overflow-hidden cursor-pointer" 
+              onClick={(e) => {
+                if (selectedIds.size > 0) {
+                  toggleSelection(media.id, e)
+                } else {
+                  setPreviewItem(media)
+                }
+              }}
+            >
+              {/* Batch selection checkbox */}
+              <div 
+                className={`absolute top-2 left-2 z-30 w-5 h-5 rounded flex items-center justify-center border transition-colors cursor-pointer ${selectedIds.has(media.id) ? 'bg-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-black/50 border-white/50 hover:border-white'}`}
+                onClick={(e) => toggleSelection(media.id, e)}
+                title={selectedIds.has(media.id) ? "Desmarcar" : "Selecionar"}
+              >
                 {selectedIds.has(media.id) && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
               </div>
+
               <img 
                 src={media.thumbUrl} 
                 alt={media.title} 
@@ -259,24 +276,41 @@ export default function Library() {
                 }}
                 className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
               />
+
               {media.isFavorite && (
                 <div className="absolute top-2 right-2 text-yellow-400 z-10 filter drop-shadow-md">
                   <Star className="w-5 h-5 fill-yellow-400" />
                 </div>
               )}
-              {/* Hover actions */}
-              <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <button onClick={(e) => { e.stopPropagation(); toggleFavorite(media.id, !!media.isFavorite) }} className={`p-2 bg-[var(--color-surface)] rounded-full transition-colors ${media.isFavorite ? 'hover:bg-yellow-600' : 'hover:bg-[var(--color-surface-hover)]'}`} title={media.isFavorite ? "Remover dos favoritos" : "Favoritar"}>
-                  <Star className={`w-4 h-4 ${media.isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-white'}`} />
+
+              {/* Central Play Button */}
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    setPreviewItem(media)
+                  }}
+                  className="pointer-events-auto w-11 h-11 rounded-full bg-black/75 hover:bg-[var(--color-brand)] text-white flex items-center justify-center shadow-2xl border border-white/25 hover:border-transparent transition-all transform opacity-85 group-hover:opacity-100 group-hover:scale-110 cursor-pointer z-20"
+                  title="Apertar Play / Assistir Vídeo"
+                >
+                  <Play className="w-5 h-5 ml-0.5 fill-current text-white" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(media.driveLink); }} className="p-2 bg-[var(--color-surface)] rounded-full hover:bg-blue-600 transition-colors" title="Copiar Link">
-                  <Copy className="w-4 h-4" />
+              </div>
+
+              {/* Hover actions at bottom */}
+              <div className="absolute inset-x-0 bottom-0 p-2 bg-gradient-to-t from-black/95 via-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 z-20">
+                <button onClick={(e) => { e.stopPropagation(); toggleFavorite(media.id, !!media.isFavorite) }} className={`p-1.5 bg-[var(--color-surface)] rounded-full transition-colors ${media.isFavorite ? 'hover:bg-yellow-600' : 'hover:bg-[var(--color-surface-hover)]'}`} title={media.isFavorite ? "Remover dos favoritos" : "Favoritar"}>
+                  <Star className={`w-3.5 h-3.5 ${media.isFavorite ? 'text-yellow-400 fill-yellow-400' : 'text-white'}`} />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); openEditModal(media) }} className="p-2 bg-[var(--color-surface)] rounded-full hover:bg-[var(--color-brand)] transition-colors" title="Editar">
-                  <Edit className="w-4 h-4" />
+                <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(media.driveLink); }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-blue-600 transition-colors" title="Copiar Link">
+                  <Copy className="w-3.5 h-3.5" />
                 </button>
-                <button onClick={(e) => { e.stopPropagation(); handleDelete(media.id) }} className="p-2 bg-[var(--color-surface)] rounded-full hover:bg-red-600 transition-colors" title="Excluir">
-                  <Trash2 className="w-4 h-4" />
+                <button onClick={(e) => { e.stopPropagation(); openEditModal(media) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-[var(--color-brand)] transition-colors" title="Editar">
+                  <Edit className="w-3.5 h-3.5" />
+                </button>
+                <button onClick={(e) => { e.stopPropagation(); handleDelete(media.id) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-red-600 transition-colors" title="Excluir">
+                  <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
             </div>
@@ -426,6 +460,21 @@ export default function Library() {
         onSave={handleBatchSave}
         count={selectedIds.size}
       />
+
+      {/* Video Preview / Player Modal */}
+      {previewItem && (
+        <MediaInspectorModal
+          isOpen={!!previewItem}
+          onClose={() => setPreviewItem(null)}
+          title={previewItem.title}
+          url={previewItem.driveLink}
+          niche={previewItem.niche}
+          category={previewItem.category}
+          thumbUrl={previewItem.thumbUrl}
+          tags={previewItem.tags}
+          hideSaveAction
+        />
+      )}
     </div>
   )
 }

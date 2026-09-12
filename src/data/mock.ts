@@ -76,7 +76,7 @@ export const initialMediaItems: MediaItem[] = [
     title: brollNames[i] || `B-roll ${i + 1}`,
   thumbUrl: `https://picsum.photos/seed/${i + 100}/300/400`,
   driveLink: `https://drive.google.com/file/d/broll_${i + 1}/sharing`,
-  tags: ["Validado", i % 3 === 0 ? "Premium" : "Standard"],
+  tags: ["Validado", "Mel", "Honey Tweak", "Ingrediente Natural", i % 3 === 0 ? "Premium" : "B-Roll"],
   niche: i % 2 === 0 ? "Diabetes" : "Neuropatia",
   category: "broll"
 }))

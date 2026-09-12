@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, ExternalLink, Check, Film, BookmarkPlus } from 'lucide-react'
+import { X, ExternalLink, Check, Film, BookmarkPlus, Copy } from 'lucide-react'
 import { parseMediaUrl } from '../../utils/embedUtils'
 import { useMediaItems } from '../../hooks/useMediaItems'
 import { Button } from '../ui/Button'
@@ -14,6 +14,7 @@ export interface MediaInspectorProps {
   category?: string
   thumbUrl?: string
   tags?: string[]
+  hideSaveAction?: boolean
 }
 
 export function MediaInspectorModal({
@@ -24,11 +25,13 @@ export function MediaInspectorModal({
   niche = 'Geral',
   category = 'broll',
   thumbUrl = '',
-  tags = ['Importado Spy']
+  tags = ['Importado Spy'],
+  hideSaveAction = false
 }: MediaInspectorProps) {
   const { addMediaItem } = useMediaItems()
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [copied, setCopied] = useState(false)
 
   if (!isOpen) return null
 
@@ -119,9 +122,17 @@ export function MediaInspectorModal({
           ) : embedInfo.platform === 'drive' && embedInfo.videoId ? (
             <iframe
               src={embedInfo.embedUrl}
-              className="w-full h-full border-0"
-              allow="autoplay"
+              className="w-full h-full min-h-[460px] border-0"
+              allow="autoplay; encrypted-media; fullscreen"
+              allowFullScreen
               title={title}
+            />
+          ) : embedInfo.platform === 'direct' && embedInfo.embedUrl && (embedInfo.embedUrl.endsWith('.mp4') || embedInfo.embedUrl.endsWith('.webm') || embedInfo.embedUrl.includes('.mp4?') || embedInfo.embedUrl.includes('fbcdn.net') || embedInfo.embedUrl.includes('tiktokcdn.com')) ? (
+            <video
+              src={embedInfo.embedUrl}
+              controls
+              autoPlay
+              className="w-full h-full max-h-[65vh] object-contain"
             />
           ) : (
             <div className="text-center p-8 text-gray-400 space-y-4">
@@ -153,28 +164,43 @@ export function MediaInspectorModal({
               <ExternalLink className="w-3.5 h-3.5 text-[var(--color-brand)]" />
               Abrir Link Externo
             </a>
-          </div>
-
-          <div className="flex items-center gap-2">
             <Button
-              variant={isSaved ? 'outline' : 'brand'}
-              onClick={handleSaveToLibrary}
-              disabled={isSaving}
-              className="text-xs flex items-center gap-2 px-4 py-2"
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                navigator.clipboard.writeText(url)
+                setCopied(true)
+                setTimeout(() => setCopied(false), 2000)
+              }}
+              className="text-xs flex items-center gap-1.5 px-3 py-2 bg-white/5 border-white/10 hover:bg-white/10"
             >
-              {isSaved ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  Salvo na Biblioteca!
-                </>
-              ) : (
-                <>
-                  <BookmarkPlus className="w-4 h-4" />
-                  {isSaving ? 'Salvando...' : 'Salvar na Minha Biblioteca'}
-                </>
-              )}
+              {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copied ? 'Link Copiado!' : 'Copiar Link'}
             </Button>
           </div>
+
+          {!hideSaveAction && (
+            <div className="flex items-center gap-2">
+              <Button
+                variant={isSaved ? 'outline' : 'brand'}
+                onClick={handleSaveToLibrary}
+                disabled={isSaving}
+                className="text-xs flex items-center gap-2 px-4 py-2"
+              >
+                {isSaved ? (
+                  <>
+                    <Check className="w-4 h-4 text-emerald-400" />
+                    Salvo na Biblioteca!
+                  </>
+                ) : (
+                  <>
+                    <BookmarkPlus className="w-4 h-4" />
+                    {isSaving ? 'Salvando...' : 'Salvar na Minha Biblioteca'}
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
