@@ -141,7 +141,6 @@ services:
       POSTGRES_INITDB_ARGS: "--lc-collate=C --lc-ctype=C"
     volumes:
       - db-data:/var/lib/postgresql/data
-      - ../supabase_vps_schema.sql:/docker-entrypoint-initdb.d/99-schema.sql:ro
     healthcheck:
       test: pg_isready -U postgres -h localhost
       interval: 5s
