@@ -75,7 +75,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
 
   // 4. Google Drive
   if (cleanUrl.includes('drive.google.com')) {
-    const match = cleanUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/)
+    const match = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/)
     if (match && match[1]) {
       const fileId = match[1]
       return {
@@ -91,6 +91,21 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
   if (cleanUrl.includes('facebook.com/ads/library')) {
     return {
       platform: 'meta',
+      embedUrl: cleanUrl,
+      originalUrl: cleanUrl
+    }
+  }
+
+  // 6. Direct MP4 / WebM / Video CDN URLs
+  if (
+    cleanUrl.endsWith('.mp4') || 
+    cleanUrl.endsWith('.webm') || 
+    cleanUrl.includes('tiktokcdn.com') || 
+    cleanUrl.includes('fbcdn.net') ||
+    cleanUrl.includes('video.twimg.com')
+  ) {
+    return {
+      platform: 'direct',
       embedUrl: cleanUrl,
       originalUrl: cleanUrl
     }
