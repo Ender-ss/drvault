@@ -96,13 +96,13 @@ export function MediaInspectorModal({
 
         {/* Player Container */}
         <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden min-h-[440px] max-h-[68vh] p-2">
-          {embedInfo.platform === 'tiktok' && embedInfo.videoId ? (
-            <iframe
-              src={`https://www.tiktok.com/player/v1/${embedInfo.videoId}?autoplay=1`}
-              className="w-full h-[580px] max-w-[360px] rounded-xl border-0 shadow-2xl bg-black"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-              title={title}
+          {embedInfo.platform === 'tiktok' || embedInfo.platform === 'direct' ? (
+            <video
+              src={embedInfo.embedUrl || (embedInfo.videoId ? `/api/spy/video/${embedInfo.videoId}` : url)}
+              controls
+              autoPlay
+              playsInline
+              className="w-full h-full max-h-[66vh] object-contain rounded-xl shadow-2xl"
             />
           ) : embedInfo.platform === 'youtube' && embedInfo.videoId ? (
             <iframe
@@ -126,14 +126,6 @@ export function MediaInspectorModal({
               allow="autoplay; encrypted-media; fullscreen"
               allowFullScreen
               title={title}
-            />
-          ) : embedInfo.platform === 'direct' && embedInfo.embedUrl ? (
-            <video
-              src={embedInfo.embedUrl}
-              controls
-              autoPlay
-              playsInline
-              className="w-full h-full max-h-[65vh] object-contain"
             />
           ) : (
             <div className="text-center p-8 text-gray-400 space-y-4">

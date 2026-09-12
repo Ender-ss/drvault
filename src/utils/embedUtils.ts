@@ -12,7 +12,19 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
 
   const cleanUrl = url.trim()
 
-  // 1. TikTok (Pages, Embeds, Shortlinks, CDN links with video IDs)
+  // 1. In-App Video Server Endpoint
+  if (cleanUrl.includes('/api/spy/video/')) {
+    const idMatch = cleanUrl.match(/\/api\/spy\/video\/([a-zA-Z0-9_-]+)/)
+    const videoId = idMatch ? idMatch[1] : undefined
+    return {
+      platform: 'tiktok',
+      embedUrl: cleanUrl,
+      originalUrl: videoId ? `https://www.tiktok.com/@video/video/${videoId}` : cleanUrl,
+      videoId
+    }
+  }
+
+  // 2. TikTok (Pages, Embeds, Shortlinks)
   if (
     cleanUrl.includes('tiktok.com') ||
     cleanUrl.includes('tiktokv.com') ||
@@ -30,7 +42,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
       const videoId = videoIdMatch[1]
       return {
         platform: 'tiktok',
-        embedUrl: `https://www.tiktok.com/embed/v2/${videoId}`,
+        embedUrl: `/api/spy/video/${videoId}`,
         originalUrl: cleanUrl,
         videoId
       }
@@ -43,7 +55,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 2. YouTube / YouTube Shorts
+  // 3. YouTube / YouTube Shorts
   if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
     let videoId = ''
     if (cleanUrl.includes('shorts/')) {
@@ -67,7 +79,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 3. Instagram
+  // 4. Instagram
   if (cleanUrl.includes('instagram.com')) {
     const match = cleanUrl.match(/\/(reel|p)\/([a-zA-Z0-9_-]+)/)
     if (match && match[2]) {
@@ -81,7 +93,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 4. Google Drive
+  // 5. Google Drive
   if (cleanUrl.includes('drive.google.com')) {
     const match =
       cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
@@ -98,7 +110,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 5. Meta Ads Library
+  // 6. Meta Ads Library
   if (cleanUrl.includes('facebook.com/ads/library')) {
     return {
       platform: 'meta',
@@ -107,7 +119,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 6. Direct MP4 / Video Stream
+  // 7. Direct MP4 / Video Stream
   if (
     cleanUrl.endsWith('.mp4') ||
     cleanUrl.endsWith('.webm') ||
