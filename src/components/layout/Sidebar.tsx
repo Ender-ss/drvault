@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, FileText, Library, Folder, Settings, Youtube, Anchor, LogOut } from "lucide-react"
+import { LayoutDashboard, FileText, Library, Folder, Settings, Youtube, Anchor, LogOut, Flame } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { useAuth } from "../../contexts/AuthContext"
 
 const navItems = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
+  { name: "Martins Spy", href: "/spy", icon: Flame },
   { name: "Copies", href: "/copies", icon: FileText },
   { name: "Biblioteca", href: "/library", icon: Library },
   { name: "Tipos de Ads", href: "/ad-types", icon: Youtube },

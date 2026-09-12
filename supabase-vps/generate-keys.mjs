@@ -49,17 +49,16 @@ SERVICE_ROLE_KEY=${serviceRoleKey}
 # DATABASE
 ############
 POSTGRES_DB=postgres
-POSTGRES_PORT=5432
+POSTGRES_PORT=54322
 
 ############
 # API & PORTS
 ############
-# Defina o IP ou Domínio público da sua VPS abaixo (ex: http://123.45.67.89:8443 ou https://supabase.seudominio.com)
 API_EXTERNAL_URL=http://localhost:8443
 SITE_URL=http://localhost:3000
 ADDITIONAL_REDIRECT_URLS=http://localhost:3000/*
 
-STUDIO_PORT=8000
+STUDIO_PORT=8085
 KONG_HTTP_PORT=8443
 
 ############
@@ -71,6 +70,19 @@ ENABLE_EMAIL_AUTOCONFIRM=true
 
 const envPath = path.join(__dirname, '.env');
 fs.writeFileSync(envPath, envContent);
+
+// Also replace in kong.yml
+const kongPath = path.join(__dirname, 'volumes', 'api', 'kong.yml');
+if (fs.existsSync(kongPath)) {
+  let kongContent = fs.readFileSync(kongPath, 'utf8');
+  kongContent = kongContent.replace(/\$\{ANON_KEY\}|[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+\.[a-zA-Z0-9\-_]+/g, (match) => {
+    return match === '${SERVICE_ROLE_KEY}' ? serviceRoleKey : match;
+  });
+  // Simple replacement
+  kongContent = kongContent.replace(/\$\{ANON_KEY\}/g, anonKey);
+  kongContent = kongContent.replace(/\$\{SERVICE_ROLE_KEY\}/g, serviceRoleKey);
+  fs.writeFileSync(kongPath, kongContent);
+}
 
 console.log('==============================================================');
 console.log('✅ Chaves do Supabase geradas com sucesso em supabase-vps/.env');

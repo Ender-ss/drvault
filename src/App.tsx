@@ -6,6 +6,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute"
 
 // Lazy load or simply import pages
 import Dashboard from "./pages/Dashboard"
+import MartinsSpy from "./pages/MartinsSpy"
 import CopiesList from "./pages/CopiesList"
 import CopyDetail from "./pages/CopyDetail"
 import Library from "./pages/Library"
@@ -28,6 +29,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<BaseLayout />}>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/spy" element={<MartinsSpy />} />
+            <Route path="/martins-spy" element={<Navigate to="/spy" replace />} />
             <Route path="/copies" element={<CopiesList />} />
             <Route path="/copies/:id" element={<CopyDetail />} />
             <Route path="/library" element={<Library />} />
