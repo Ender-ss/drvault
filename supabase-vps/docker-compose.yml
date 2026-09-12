@@ -81,7 +81,7 @@ services:
 
   storage:
     container_name: supabase-storage
-    image: supabase/storage-api:v1.14.8
+    image: supabase/storage-api:v1.11.13
     restart: unless-stopped
     environment:
       ANON_KEY: ${ANON_KEY}
