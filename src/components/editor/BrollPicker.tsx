@@ -76,7 +76,20 @@ export function BrollPicker({ isOpen, onClose, onSelect }: BrollPickerProps) {
                 className="bg-[#1f2329] rounded-lg overflow-hidden flex flex-col border border-transparent hover:border-[var(--color-brand)] transition-all group text-left cursor-pointer hover:scale-[1.02]"
               >
                 <div className="aspect-square bg-black relative overflow-hidden">
-                  <img src={media.thumbUrl} alt={media.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+                  <img 
+                    src={media.thumbUrl} 
+                    alt={media.title} 
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (!target.dataset.fallback) {
+                        target.dataset.fallback = "true";
+                        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(media.title)}&background=1f2329&color=e2e8f0&size=400`;
+                      }
+                    }}
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+                  />
                 </div>
                 <div className="p-2 space-y-1">
                   <p className="text-xs font-medium text-[var(--color-text)] truncate">{media.title}</p>

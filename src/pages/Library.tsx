@@ -245,7 +245,20 @@ export default function Library() {
               <div className={`absolute top-2 left-2 z-10 w-5 h-5 rounded flex items-center justify-center border transition-colors ${selectedIds.has(media.id) ? 'bg-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-black/50 border-white/50 group-hover:border-white'}`}>
                 {selectedIds.has(media.id) && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
               </div>
-              <img src={media.thumbUrl} alt={media.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" />
+              <img 
+                src={media.thumbUrl} 
+                alt={media.title} 
+                referrerPolicy="no-referrer"
+                loading="lazy"
+                onError={(e) => {
+                  const target = e.currentTarget;
+                  if (!target.dataset.fallback) {
+                    target.dataset.fallback = "true";
+                    target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(media.title)}&background=1f2329&color=e2e8f0&size=400`;
+                  }
+                }}
+                className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
+              />
               {media.isFavorite && (
                 <div className="absolute top-2 right-2 text-yellow-400 z-10 filter drop-shadow-md">
                   <Star className="w-5 h-5 fill-yellow-400" />

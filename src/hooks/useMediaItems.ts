@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { initialMediaItems, type MediaItem } from '../data/mock'
 import { useAuth } from '../contexts/AuthContext'
 import { supabase } from '../lib/supabase'
+import { getOptimizedThumbUrl } from '../lib/utils'
 
 export function useMediaItems() {
   const { user } = useAuth()
@@ -40,7 +41,7 @@ export function useMediaItems() {
       const mappedItems: MediaItem[] = itemsData.map(item => ({
         id: item.id,
         title: item.title,
-        thumbUrl: item.thumb_url,
+        thumbUrl: getOptimizedThumbUrl(item.thumb_url, item.drive_link),
         driveLink: item.drive_link,
         tags: item.tags || [],
         niche: item.niche,
