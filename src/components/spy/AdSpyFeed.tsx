@@ -540,36 +540,12 @@ export function AdSpyFeed() {
                 return (
                   <div
                     key={item.id}
-                    className="flex flex-col rounded-2xl bg-[#1a1d24] border border-[var(--color-border)] hover:border-blue-500/40 transition-all duration-300 overflow-hidden shadow-lg p-5 justify-between space-y-4"
+                    className="flex flex-col rounded-2xl bg-[#1a1d24] border border-[var(--color-border)] hover:border-blue-500/40 transition-all duration-300 overflow-hidden shadow-lg justify-between space-y-3"
                   >
-                    <div>
-                      {/* Header */}
-                      <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/5">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <div className="w-8 h-8 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center font-black text-xs">
-                            f
-                          </div>
-                          <div className="min-w-0">
-                            <h4 className="text-xs font-bold text-white truncate">{item.brand_name}</h4>
-                            <span className="text-[10px] text-gray-400">{item.niche} • {item.days_active}d ativo</span>
-                          </div>
-                        </div>
-                        <Badge variant="secondary" className="text-[9px] bg-emerald-500/15 text-emerald-400 border-0">
-                          ATIVO
-                        </Badge>
-                      </div>
-
-                      {/* Copy Preview */}
-                      <p className="mt-3 text-xs text-gray-300 leading-relaxed line-clamp-4 bg-black/20 p-3 rounded-xl border border-white/5 font-mono text-[11px]">
-                        {item.copy_transcript || 'Criativo com monitoramento ativo na Biblioteca de Anúncios.'}
-                      </p>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="pt-2 flex items-center gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
+                    {/* Card Thumbnail / Preview */}
+                    {item.thumb_url && !item.thumb_url.includes('unsplash') ? (
+                      <div 
+                        className="relative aspect-video bg-black overflow-hidden flex items-center justify-center cursor-pointer group"
                         onClick={() => setInspectorData({
                           isOpen: true,
                           title: item.title,
@@ -579,24 +555,93 @@ export function AdSpyFeed() {
                           thumbUrl: item.thumb_url,
                           tags: ['Meta Ads Library', item.niche]
                         })}
-                        className="flex-1 text-xs h-9 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/20 text-blue-400"
                       >
-                        <Play className="w-3.5 h-3.5 mr-1.5" />
-                        Inspecionar Anúncio
-                      </Button>
+                        <img
+                          src={item.thumb_url}
+                          alt={item.title}
+                          referrerPolicy="no-referrer"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-black/20" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/40">
+                          <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center shadow-lg">
+                            <Play className="w-4 h-4 fill-current translate-x-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
 
-                      <button
-                        onClick={(e) => handleSaveItem(item.id, item.title, item.video_url, item.thumb_url, item.niche, 'Meta Ads Library', e)}
-                        disabled={isSaved}
-                        className={`p-2.5 rounded-xl text-xs font-semibold transition-all ${
-                          isSaved
-                            ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                            : 'bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 border border-white/10'
-                        }`}
-                        title="Salvar na Biblioteca DRVault"
-                      >
-                        {isSaved ? <Check className="w-4 h-4" /> : <BookmarkPlus className="w-4 h-4" />}
-                      </button>
+                    <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
+                      <div>
+                        {/* Header */}
+                        <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-white/5">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            {item.thumb_url && item.thumb_url.includes('scontent') ? (
+                              <img 
+                                src={item.thumb_url} 
+                                alt={item.brand_name}
+                                referrerPolicy="no-referrer"
+                                className="w-7 h-7 rounded-full object-cover border border-white/10" 
+                              />
+                            ) : (
+                              <div className="w-7 h-7 rounded-full bg-blue-600/20 text-blue-400 flex items-center justify-center font-black text-xs">
+                                f
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-white truncate">{item.brand_name}</h4>
+                              <span className="text-[10px] text-gray-400">{item.days_active}d ativo • {metaCountry}</span>
+                            </div>
+                          </div>
+                          <Badge variant="secondary" className="text-[9px] bg-emerald-500/15 text-emerald-400 border-0">
+                            ATIVO
+                          </Badge>
+                        </div>
+
+                        {/* Title & Copy Preview */}
+                        {item.title && (
+                          <h5 className="text-[11px] font-semibold text-gray-200 mt-2 line-clamp-1">
+                            {item.title}
+                          </h5>
+                        )}
+                        <p className="mt-2 text-[11px] text-gray-300 leading-relaxed line-clamp-4 bg-black/25 p-2.5 rounded-xl border border-white/5 font-sans">
+                          {item.copy_transcript}
+                        </p>
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="pt-2 flex items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setInspectorData({
+                            isOpen: true,
+                            title: item.title || item.brand_name,
+                            url: item.video_url,
+                            niche: item.niche,
+                            category: 'avatar',
+                            thumbUrl: item.thumb_url,
+                            tags: ['Meta Ads Library', item.niche]
+                          })}
+                          className="flex-1 text-xs h-8 bg-blue-600/10 hover:bg-blue-600/20 border-blue-500/20 text-blue-400"
+                        >
+                          <Play className="w-3 h-3 mr-1.5 fill-current" />
+                          Inspecionar
+                        </Button>
+
+                        <button
+                          onClick={(e) => handleSaveItem(item.id, item.title || item.brand_name, item.video_url, item.thumb_url, item.niche, 'Meta Ads Library', e)}
+                          disabled={isSaved}
+                          className={`p-2 rounded-lg text-xs font-semibold transition-all ${
+                            isSaved
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                              : 'bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 border border-white/10'
+                          }`}
+                          title="Salvar na Biblioteca DRVault"
+                        >
+                          {isSaved ? <Check className="w-3.5 h-3.5" /> : <BookmarkPlus className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )
