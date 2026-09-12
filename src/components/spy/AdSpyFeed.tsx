@@ -13,17 +13,19 @@ import {
   Key 
 } from 'lucide-react'
 import { scaledAdsData } from '../../data/adSpyData'
-import { searchMetaAds, fetchTikTokTopAds, type LiveAdItem } from '../../services/spyApi'
+import { searchMetaAds, fetchTikTokTopAds, searchTikTokOrganic, type LiveAdItem } from '../../services/spyApi'
 import { useMediaItems } from '../../hooks/useMediaItems'
 import { Badge } from '../ui/Badge'
 import { Button } from '../ui/Button'
 import { MediaInspectorModal } from './MediaInspectorModal'
 
 type SpyMode = 'tiktok_live' | 'meta_live' | 'curated'
+type TikTokSubMode = 'organic_search' | 'creative_radar'
 
 export function AdSpyFeed() {
   const { addMediaItem } = useMediaItems()
   const [mode, setMode] = useState<SpyMode>('tiktok_live')
+  const [ttSubMode, setTtSubMode] = useState<TikTokSubMode>('organic_search')
   
   // Curated State
   const [searchTerm, setSearchTerm] = useState('')
@@ -31,7 +33,8 @@ export function AdSpyFeed() {
   const [selectedPlatform, setSelectedPlatform] = useState('Todas')
   const [selectedMinDays, setSelectedMinDays] = useState<number>(0)
 
-  // TikTok Live State
+  // TikTok State
+  const [ttSearchQuery, setTtSearchQuery] = useState('diabetes')
   const [ttCountry, setTtCountry] = useState('BR')
   const [ttIndustry, setTtIndustry] = useState('all')
   const [ttPeriod, setTtPeriod] = useState<number>(30)
@@ -69,10 +72,32 @@ export function AdSpyFeed() {
   const niches = ['Todos', 'Diabetes', 'Emagrecimento', 'Alzheimer', 'Neuropatia', 'Disfunção Erétil', 'Dental']
   const platforms = ['Todas', 'meta', 'tiktok', 'youtube']
 
-  // Initial fetch for TikTok live ads
+  // Initial fetch for TikTok
   useEffect(() => {
-    loadTikTokAds()
-  }, [ttCountry, ttIndustry, ttPeriod])
+    if (ttSubMode === 'organic_search') {
+      loadTikTokOrganic()
+    } else {
+      loadTikTokAds()
+    }
+  }, [ttSubMode, ttCountry])
+
+  const loadTikTokOrganic = async () => {
+    if (!ttSearchQuery.trim()) return
+    setTtLoading(true)
+    setTtError('')
+    try {
+      const res = await searchTikTokOrganic(ttSearchQuery, ttCountry)
+      if (res.success && res.data) {
+        setTtAds(res.data)
+      } else {
+        setTtError(res.error || 'Não foi possível encontrar vídeos no TikTok')
+      }
+    } catch (err: any) {
+      setTtError(err.message || 'Erro ao conectar ao motor de busca do TikTok')
+    } finally {
+      setTtLoading(false)
+    }
+  }
 
   const loadTikTokAds = async () => {
     setTtLoading(true)
@@ -216,79 +241,133 @@ export function AdSpyFeed() {
       </div>
 
       {/* ========================================================================= */}
-      {/* MODE 1: TIKTOK CREATIVE CENTER RADAR (LIVE)                               */}
+      {/* MODE 1: TIKTOK RADAR & ORGANIC SEARCH (LIVE)                              */}
       {/* ========================================================================= */}
       {mode === 'tiktok_live' && (
         <div className="space-y-5 animate-in fade-in duration-300">
-          {/* Controls Bar */}
-          <div className="p-4 rounded-xl bg-[#1a1d24] border border-[var(--color-border)] flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Country */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-400">País:</span>
-                <select
-                  value={ttCountry}
-                  onChange={(e) => setTtCountry(e.target.value)}
-                  className="bg-[#121418] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[var(--color-brand)]"
-                >
-                  <option value="BR">🇧🇷 Brasil</option>
-                  <option value="US">🇺🇸 Estados Unidos</option>
-                  <option value="GB">🇬🇧 Reino Unido</option>
-                  <option value="AU">🇦🇺 Austrália</option>
-                  <option value="DE">🇩🇪 Alemanha</option>
-                  <option value="FR">🇫🇷 França</option>
-                </select>
-              </div>
-
-              {/* Industry / Niche */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-400">Nicho / Indústria:</span>
-                <select
-                  value={ttIndustry}
-                  onChange={(e) => setTtIndustry(e.target.value)}
-                  className="bg-[#121418] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[var(--color-brand)]"
-                >
-                  <option value="all">Todas as Indústrias</option>
-                  <option value="health">Saúde & Suplementos (Health)</option>
-                  <option value="beauty">Beleza & Cosméticos (Beauty)</option>
-                  <option value="ecommerce">E-Commerce & Produtos Físicos</option>
-                  <option value="education">Educação & Infoprodutos</option>
-                  <option value="financial">Finanças & Renda Extra</option>
-                </select>
-              </div>
-
-              {/* Period */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold text-gray-400">Período:</span>
-                <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/40 border border-white/5">
-                  {[7, 30, 180].map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setTtPeriod(d)}
-                      className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
-                        ttPeriod === d
-                          ? 'bg-[var(--color-brand)] text-white'
-                          : 'text-gray-400 hover:text-white'
-                      }`}
-                    >
-                      {d}d
-                    </button>
-                  ))}
-                </div>
-              </div>
+          {/* Submode Switcher */}
+          <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-xl bg-[#1a1d24] border border-[var(--color-border)]">
+            <div className="flex items-center gap-2 p-1 rounded-xl bg-black/40 border border-white/5">
+              <button
+                onClick={() => setTtSubMode('organic_search')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  ttSubMode === 'organic_search'
+                    ? 'bg-[#00f2fe] text-black shadow-md'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Search className="w-3.5 h-3.5" />
+                Busca Orgânica & Viral
+              </button>
+              <button
+                onClick={() => setTtSubMode('creative_radar')}
+                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
+                  ttSubMode === 'creative_radar'
+                    ? 'bg-[#00f2fe] text-black shadow-md'
+                    : 'text-gray-400 hover:text-white'
+                }`}
+              >
+                <Flame className="w-3.5 h-3.5" />
+                Top Ads Radar (Creative Center)
+              </button>
             </div>
 
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={loadTikTokAds}
-              disabled={ttLoading}
-              className="text-xs flex items-center gap-1.5 border-white/10 hover:bg-white/5"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${ttLoading ? 'animate-spin text-[var(--color-brand)]' : ''}`} />
-              {ttLoading ? 'Consultando Radar...' : 'Atualizar Top Ads'}
-            </Button>
+            {/* Country Selector */}
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-gray-400">País:</span>
+              <select
+                value={ttCountry}
+                onChange={(e) => setTtCountry(e.target.value)}
+                className="bg-[#121418] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]"
+              >
+                <option value="BR">🇧🇷 Brasil</option>
+                <option value="US">🇺🇸 Estados Unidos</option>
+                <option value="GB">🇬🇧 Reino Unido</option>
+                <option value="AU">🇦🇺 Austrália</option>
+                <option value="DE">🇩🇪 Alemanha</option>
+                <option value="FR">🇫🇷 França</option>
+              </select>
+            </div>
           </div>
+
+          {/* Submode 1: Organic Search Controls */}
+          {ttSubMode === 'organic_search' ? (
+            <div className="p-4 rounded-xl bg-[#1a1d24] border border-[var(--color-border)] flex flex-col md:flex-row items-center gap-3">
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={ttSearchQuery}
+                  onChange={(e) => setTtSearchQuery(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && loadTikTokOrganic()}
+                  placeholder="Pesquise por termo ou hashtag orgânica no TikTok (ex: diabetes, calvície, emagrecimento, dropshipping)..."
+                  className="w-full bg-[#121418] border border-white/10 rounded-xl pl-10 pr-4 py-2 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-[#00f2fe]"
+                />
+              </div>
+
+              <Button
+                onClick={loadTikTokOrganic}
+                disabled={ttLoading}
+                className="bg-[#00f2fe] hover:bg-[#00f2fe]/90 text-black font-bold text-xs px-6 py-2 rounded-xl flex items-center gap-2 w-full md:w-auto shadow-lg shadow-[#00f2fe]/20"
+              >
+                {ttLoading ? <Loader2 className="w-4 h-4 animate-spin text-black" /> : <Search className="w-4 h-4 text-black" />}
+                {ttLoading ? 'Pesquisando...' : 'Buscar Vídeos'}
+              </Button>
+            </div>
+          ) : (
+            /* Submode 2: Creative Center Radar Controls */
+            <div className="p-4 rounded-xl bg-[#1a1d24] border border-[var(--color-border)] flex flex-wrap items-center justify-between gap-4">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Industry / Niche */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-400">Nicho / Indústria:</span>
+                  <select
+                    value={ttIndustry}
+                    onChange={(e) => setTtIndustry(e.target.value)}
+                    className="bg-[#121418] border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-[#00f2fe]"
+                  >
+                    <option value="all">Todas as Indústrias</option>
+                    <option value="health">Saúde & Suplementos (Health)</option>
+                    <option value="beauty">Beleza & Cosméticos (Beauty)</option>
+                    <option value="ecommerce">E-Commerce & Produtos Físicos</option>
+                    <option value="education">Educação & Infoprodutos</option>
+                    <option value="financial">Finanças & Renda Extra</option>
+                  </select>
+                </div>
+
+                {/* Period */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-400">Período:</span>
+                  <div className="flex items-center gap-1 p-0.5 rounded-lg bg-black/40 border border-white/5">
+                    {[7, 30, 180].map((d) => (
+                      <button
+                        key={d}
+                        onClick={() => setTtPeriod(d)}
+                        className={`px-2.5 py-1 rounded text-[11px] font-medium transition-colors ${
+                          ttPeriod === d
+                            ? 'bg-[#00f2fe] text-black font-bold'
+                            : 'text-gray-400 hover:text-white'
+                        }`}
+                      >
+                        {d}d
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={loadTikTokAds}
+                disabled={ttLoading}
+                className="text-xs flex items-center gap-1.5 border-white/10 hover:bg-white/5"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${ttLoading ? 'animate-spin text-[#00f2fe]' : ''}`} />
+                {ttLoading ? 'Consultando Radar...' : 'Atualizar Top Ads'}
+              </Button>
+            </div>
+          )}
 
           {/* Error Message */}
           {ttError && (

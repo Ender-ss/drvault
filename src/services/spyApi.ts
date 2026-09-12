@@ -78,6 +78,25 @@ export async function fetchTikTokTopAds(
   return res.json()
 }
 
+export async function searchTikTokOrganic(
+  query: string,
+  country: string = 'BR',
+  page: number = 1
+): Promise<SpyApiResponse> {
+  const params = new URLSearchParams({
+    q: query,
+    country,
+    page: page.toString(),
+    limit: '24'
+  })
+
+  const res = await fetch(`${API_BASE}/tiktok/search?${params.toString()}`)
+  if (!res.ok) {
+    throw new Error(`Erro ao pesquisar no TikTok Orgânico: ${res.statusText}`)
+  }
+  return res.json()
+}
+
 export async function getSpyEngineStatus(): Promise<{ status: string; version: string; capabilities: string[] }> {
   const res = await fetch(`${API_BASE}/status`)
   return res.json()
