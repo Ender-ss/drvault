@@ -1,0 +1,100 @@
+_format_version: "2.1"
+_transform: true
+
+services:
+  - name: auth-v1-open
+    url: http://auth:9999/
+    routes:
+      - name: auth-v1-open
+        strip_path: true
+        paths:
+          - /auth/v1/verify
+          - /auth/v1/callback
+          - /auth/v1/authorize
+
+  - name: auth-v1
+    url: http://auth:9999/
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+    routes:
+      - name: auth-v1
+        strip_path: true
+        paths:
+          - /auth/v1/
+
+  - name: rest-v1
+    url: http://rest:3000/
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+    routes:
+      - name: rest-v1
+        strip_path: true
+        paths:
+          - /rest/v1/
+
+  - name: storage-v1
+    url: http://storage:5000/
+    plugins:
+      - name: cors
+      - name: key-auth
+        config:
+          hide_credentials: false
+    routes:
+      - name: storage-v1
+        strip_path: true
+        paths:
+          - /storage/v1/
+
+  - name: meta
+    url: http://meta:8080/
+    plugins:
+      - name: key-auth
+        config:
+          hide_credentials: false
+    routes:
+      - name: meta
+        strip_path: true
+        paths:
+          - /pg/
+
+consumers:
+  - username: anon
+    keyauth_credentials:
+      - key: ${ANON_KEY}
+  - username: service_role
+    keyauth_credentials:
+      - key: ${SERVICE_ROLE_KEY}
+
+plugins:
+  - name: cors
+    config:
+      origins:
+        - "*"
+      methods:
+        - HEAD
+        - GET
+        - POST
+        - PUT
+        - PATCH
+        - DELETE
+        - OPTIONS
+      headers:
+        - Authorization
+        - ApiKey
+        - Content-Type
+        - Range
+        - prefer
+        - x-client-info
+        - apikey
+        - x-upsert
+      exposed_headers:
+        - Content-Range
+        - X-Total-Count
+      max_age: 3600
+      credentials: true

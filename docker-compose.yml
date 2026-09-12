@@ -1,0 +1,14 @@
+services:
+  drvault-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL:-http://localhost:8443}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+    container_name: drvault-web
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:80"
+    environment:
+      - NODE_ENV=production
