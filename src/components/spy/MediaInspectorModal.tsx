@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { X, ExternalLink, Check, Film, BookmarkPlus, Copy } from 'lucide-react'
 import { parseMediaUrl } from '../../utils/embedUtils'
 import { useMediaItems } from '../../hooks/useMediaItems'
@@ -32,29 +32,10 @@ export function MediaInspectorModal({
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [videoError, setVideoError] = useState(false)
-  const [useIframeFallback, setUseIframeFallback] = useState(false)
-
-  const embedInfo = parseMediaUrl(url)
-
-  // Reset errors whenever URL or open state changes
-  useEffect(() => {
-    setVideoError(false)
-    setUseIframeFallback(false)
-  }, [url, isOpen])
 
   if (!isOpen) return null
 
-  const isDirectVideo = 
-    embedInfo.platform === 'direct' ||
-    url.includes('mime_type=video_mp4') ||
-    url.includes('v16-webapp') ||
-    url.includes('/video/tos/') ||
-    url.includes('tiktokcdn.com') ||
-    url.includes('fbcdn.net') ||
-    url.includes('byteoversea.com') ||
-    url.includes('.mp4') ||
-    url.includes('.webm')
+  const embedInfo = parseMediaUrl(url)
 
   const handleSaveToLibrary = async () => {
     setIsSaving(true)
@@ -114,27 +95,12 @@ export function MediaInspectorModal({
         </div>
 
         {/* Player Container */}
-        <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden min-h-[420px] max-h-[65vh]">
-          {isDirectVideo && !videoError && !useIframeFallback ? (
-            <video
-              src={embedInfo.embedUrl || url}
-              controls
-              autoPlay
-              playsInline
-              onError={() => {
-                console.warn('Direct stream error, attempting fallback')
-                setVideoError(true)
-                if (embedInfo.videoId) {
-                  setUseIframeFallback(true)
-                }
-              }}
-              className="w-full h-full max-h-[65vh] object-contain"
-            />
-          ) : (embedInfo.platform === 'tiktok' || useIframeFallback) && embedInfo.videoId ? (
+        <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden min-h-[440px] max-h-[68vh] p-2">
+          {embedInfo.platform === 'tiktok' && embedInfo.videoId ? (
             <iframe
-              src={`https://www.tiktok.com/embed/v2/${embedInfo.videoId}`}
-              className="w-full h-[580px] max-w-[360px] rounded-lg border-0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              src={`https://www.tiktok.com/player/v1/${embedInfo.videoId}?autoplay=1`}
+              className="w-full h-[580px] max-w-[360px] rounded-xl border-0 shadow-2xl bg-black"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               title={title}
             />
@@ -160,6 +126,14 @@ export function MediaInspectorModal({
               allow="autoplay; encrypted-media; fullscreen"
               allowFullScreen
               title={title}
+            />
+          ) : embedInfo.platform === 'direct' && embedInfo.embedUrl ? (
+            <video
+              src={embedInfo.embedUrl}
+              controls
+              autoPlay
+              playsInline
+              className="w-full h-full max-h-[65vh] object-contain"
             />
           ) : (
             <div className="text-center p-8 text-gray-400 space-y-4">

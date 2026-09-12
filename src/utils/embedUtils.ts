@@ -12,29 +12,20 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
 
   const cleanUrl = url.trim()
 
-  // 1. Direct Video Stream CDN URLs (check FIRST before domain checks)
+  // 1. TikTok (Pages, Embeds, Shortlinks, CDN links with video IDs)
   if (
-    cleanUrl.includes('mime_type=video_mp4') ||
-    cleanUrl.includes('v16-webapp') ||
-    cleanUrl.includes('/video/tos/') ||
-    cleanUrl.includes('tiktokcdn.com') ||
-    cleanUrl.includes('fbcdn.net') ||
-    cleanUrl.includes('video.twimg.com') ||
-    cleanUrl.endsWith('.mp4') ||
-    cleanUrl.endsWith('.webm') ||
-    cleanUrl.includes('.mp4?')
+    cleanUrl.includes('tiktok.com') ||
+    cleanUrl.includes('tiktokv.com') ||
+    cleanUrl.includes('tiktokcdn.com')
   ) {
-    return {
-      platform: 'direct',
-      embedUrl: cleanUrl,
-      originalUrl: cleanUrl
-    }
-  }
+    const videoIdMatch =
+      cleanUrl.match(/\/video\/(\d+)/) ||
+      cleanUrl.match(/\/embed\/v2\/(\d+)/) ||
+      cleanUrl.match(/\/player\/v1\/(\d+)/) ||
+      cleanUrl.match(/item_id=(\d+)/) ||
+      cleanUrl.match(/v=(\d+)/) ||
+      cleanUrl.match(/\/(\d{15,25})/)
 
-  // 2. TikTok Video Pages
-  // Formats: https://www.tiktok.com/@user/video/1234567890 or https://vm.tiktok.com/XYZ
-  if (cleanUrl.includes('tiktok.com')) {
-    const videoIdMatch = cleanUrl.match(/\/video\/(\d+)/) || cleanUrl.match(/v=(\d+)/) || cleanUrl.match(/\/(\d{15,25})/)
     if (videoIdMatch && videoIdMatch[1]) {
       const videoId = videoIdMatch[1]
       return {
@@ -44,6 +35,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
         videoId
       }
     }
+
     return {
       platform: 'tiktok',
       embedUrl: cleanUrl,
@@ -51,7 +43,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 3. YouTube / YouTube Shorts
+  // 2. YouTube / YouTube Shorts
   if (cleanUrl.includes('youtube.com') || cleanUrl.includes('youtu.be')) {
     let videoId = ''
     if (cleanUrl.includes('shorts/')) {
@@ -75,7 +67,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 4. Instagram
+  // 3. Instagram
   if (cleanUrl.includes('instagram.com')) {
     const match = cleanUrl.match(/\/(reel|p)\/([a-zA-Z0-9_-]+)/)
     if (match && match[2]) {
@@ -89,9 +81,12 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 5. Google Drive
+  // 4. Google Drive
   if (cleanUrl.includes('drive.google.com')) {
-    const match = cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) || cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || cleanUrl.match(/id=([a-zA-Z0-9_-]+)/)
+    const match =
+      cleanUrl.match(/\/d\/([a-zA-Z0-9_-]+)/) ||
+      cleanUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) ||
+      cleanUrl.match(/id=([a-zA-Z0-9_-]+)/)
     if (match && match[1]) {
       const fileId = match[1]
       return {
@@ -103,10 +98,25 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     }
   }
 
-  // 6. Meta Ads Library
+  // 5. Meta Ads Library
   if (cleanUrl.includes('facebook.com/ads/library')) {
     return {
       platform: 'meta',
+      embedUrl: cleanUrl,
+      originalUrl: cleanUrl
+    }
+  }
+
+  // 6. Direct MP4 / Video Stream
+  if (
+    cleanUrl.endsWith('.mp4') ||
+    cleanUrl.endsWith('.webm') ||
+    cleanUrl.includes('.mp4?') ||
+    cleanUrl.includes('.webm?') ||
+    cleanUrl.includes('fbcdn.net')
+  ) {
+    return {
+      platform: 'direct',
       embedUrl: cleanUrl,
       originalUrl: cleanUrl
     }
