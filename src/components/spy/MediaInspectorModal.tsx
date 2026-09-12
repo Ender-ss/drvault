@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { X, ExternalLink, Check, Film, BookmarkPlus, Copy } from 'lucide-react'
 import { parseMediaUrl } from '../../utils/embedUtils'
 import { useMediaItems } from '../../hooks/useMediaItems'
@@ -32,10 +32,29 @@ export function MediaInspectorModal({
   const [isSaved, setIsSaved] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [videoError, setVideoError] = useState(false)
+  const [useIframeFallback, setUseIframeFallback] = useState(false)
+
+  const embedInfo = parseMediaUrl(url)
+
+  // Reset errors whenever URL or open state changes
+  useEffect(() => {
+    setVideoError(false)
+    setUseIframeFallback(false)
+  }, [url, isOpen])
 
   if (!isOpen) return null
 
-  const embedInfo = parseMediaUrl(url)
+  const isDirectVideo = 
+    embedInfo.platform === 'direct' ||
+    url.includes('mime_type=video_mp4') ||
+    url.includes('v16-webapp') ||
+    url.includes('/video/tos/') ||
+    url.includes('tiktokcdn.com') ||
+    url.includes('fbcdn.net') ||
+    url.includes('byteoversea.com') ||
+    url.includes('.mp4') ||
+    url.includes('.webm')
 
   const handleSaveToLibrary = async () => {
     setIsSaving(true)
@@ -63,7 +82,7 @@ export function MediaInspectorModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-3xl bg-[#1a1d24] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-border)] bg-[#21252d]">
@@ -96,9 +115,24 @@ export function MediaInspectorModal({
 
         {/* Player Container */}
         <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden min-h-[420px] max-h-[65vh]">
-          {embedInfo.platform === 'tiktok' && embedInfo.videoId ? (
+          {isDirectVideo && !videoError && !useIframeFallback ? (
+            <video
+              src={embedInfo.embedUrl || url}
+              controls
+              autoPlay
+              playsInline
+              onError={() => {
+                console.warn('Direct stream error, attempting fallback')
+                setVideoError(true)
+                if (embedInfo.videoId) {
+                  setUseIframeFallback(true)
+                }
+              }}
+              className="w-full h-full max-h-[65vh] object-contain"
+            />
+          ) : (embedInfo.platform === 'tiktok' || useIframeFallback) && embedInfo.videoId ? (
             <iframe
-              src={embedInfo.embedUrl}
+              src={`https://www.tiktok.com/embed/v2/${embedInfo.videoId}`}
               className="w-full h-[580px] max-w-[360px] rounded-lg border-0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
@@ -126,13 +160,6 @@ export function MediaInspectorModal({
               allow="autoplay; encrypted-media; fullscreen"
               allowFullScreen
               title={title}
-            />
-          ) : embedInfo.platform === 'direct' && embedInfo.embedUrl && (embedInfo.embedUrl.endsWith('.mp4') || embedInfo.embedUrl.endsWith('.webm') || embedInfo.embedUrl.includes('.mp4?') || embedInfo.embedUrl.includes('fbcdn.net') || embedInfo.embedUrl.includes('tiktokcdn.com')) ? (
-            <video
-              src={embedInfo.embedUrl}
-              controls
-              autoPlay
-              className="w-full h-full max-h-[65vh] object-contain"
             />
           ) : (
             <div className="text-center p-8 text-gray-400 space-y-4">
