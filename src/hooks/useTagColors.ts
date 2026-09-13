@@ -21,8 +21,27 @@ const defaultColors: Record<string, string> = {
   "Avatar Feminino": "#8b5cf6", // violet
   "Receita Caseira": "#10b981", // emerald
   "Medidor de Glicose": "#06b6d4", // light cyan
-  "Remédio Natural": "#84cc16" // lime
+  "Remédio Natural": "#84cc16", // lime
+  "Vinagre de Maçã": "#84cc16", // apple green
+  "Apple Cider Vinegar": "#65a30d", // dark olive green
+  "Bragg": "#eab308", // gold
+  "Zumbido no Ouvido": "#06b6d4", // cyan
+  "Tinnitus": "#0891b2", // deep cyan
+  "VapoRub": "#0d9488", // teal
+  "Colher na Orelha": "#0284c7", // sky blue
+  "Sementes de Chia": "#78716c", // stone
+  "Água com Chia": "#64748b", // slate
+  "Chá com Limão": "#facc15", // yellow
+  "Azeite de Oliva": "#65a30d", // olive
+  "Glicemia": "#ef4444", // red
+  "Resistência Insulínica": "#f97316", // orange
+  "Bicarbonato": "#38bdf8", // light blue
+  "Criativo / Imagem": "#6366f1", // indigo
+  "Facebook Ads": "#2563eb", // blue
+  "Shorts": "#ec4899", // pink
+  "Banana e Maçã": "#f59e0b" // amber
 }
+
 
 export function useTagColors() {
   const [colors, setColors] = useState<Record<string, string>>(defaultColors)

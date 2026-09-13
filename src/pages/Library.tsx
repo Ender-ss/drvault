@@ -1,5 +1,7 @@
-import { useState, useRef } from "react"
-import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play, Maximize2 } from "lucide-react"
+import { useState, useRef, useEffect } from "react"
+import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play, Maximize2, Tag, ChevronDown, RotateCcw, Sparkles } from "lucide-react"
+
+
 import { Badge } from "../components/ui/Badge"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
@@ -35,8 +37,25 @@ export default function Library() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   const [playingId, setPlayingId] = useState<string | null>(null)
+
+  // Tag filter dropdown state
+  const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false)
+  const [tagSearchTerm, setTagSearchTerm] = useState("")
+  const tagDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Close tag dropdown on outside click
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (tagDropdownRef.current && !tagDropdownRef.current.contains(event.target as Node)) {
+        setIsTagDropdownOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
   
   const { colors, isLoaded } = useTagColors()
+
 
   // Form state
   const [formTitle, setFormTitle] = useState("")
@@ -49,11 +68,43 @@ export default function Library() {
   const [isUploading, setIsUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Unique values for filters
-  const allTags = [...new Set(mediaItems.flatMap(m => m.tags))]
+  // Unique values and tag counts for filters
+  const tagCounts = mediaItems.reduce((acc, item) => {
+    (item.tags || []).forEach(t => {
+      acc[t] = (acc[t] || 0) + 1
+    })
+    return acc
+  }, {} as Record<string, number>)
+
+  // Sort tags by frequency, then alphabetically
+  const allTags = Object.keys(tagCounts).sort((a, b) => {
+    return tagCounts[b] - tagCounts[a] || a.localeCompare(b)
+  })
+
+  // Popular quick tags for top chips bar
+  const popularQuickTags = allTags
+    .filter(t => !['Standard', 'Importado', 'Google Drive'].includes(t))
+    .slice(0, 12)
+
   const allNiches = [...new Set(mediaItems.map(m => m.niche))]
   const allCategories = [...new Set(mediaItems.map(m => m.category))]
   const allBrollTypes = [...new Set(mediaItems.map(m => m.brollType).filter(Boolean) as string[])]
+
+  // Filtered list of tags for dropdown search
+  const filteredDropdownTags = allTags.filter(t => 
+    t.toLowerCase().includes(tagSearchTerm.toLowerCase())
+  )
+
+  const hasActiveFilters = searchTerm !== "" || filterTag !== "Todos" || filterNiche !== "Todos" || filterCategory !== "Todos" || (filterBrollType && filterBrollType !== "Todos") || filterFavorite
+
+  const clearAllFilters = () => {
+    setSearchTerm("")
+    setFilterTag("Todos")
+    setFilterNiche("Todos")
+    setFilterCategory("Todos")
+    setFilterBrollType("Todos")
+    setFilterFavorite(false)
+  }
 
   const filtered = mediaItems.filter(m => {
     const matchesSearch = searchTerm === "" ||
@@ -67,6 +118,7 @@ export default function Library() {
     const matchesFavorite = !filterFavorite || m.isFavorite
     return matchesSearch && matchesTag && matchesNiche && matchesCategory && matchesBrollType && matchesFavorite
   })
+
 
   const openNewModal = () => {
     setEditingItem(null)
@@ -223,22 +275,176 @@ export default function Library() {
             {allBrollTypes.map(c => <option key={c} value={c}>{c}</option>)}
           </select>
         )}
-        <select
-          className="bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
-          value={filterTag}
-          onChange={e => setFilterTag(e.target.value)}
-        >
-          <option value="Todos">Tag: Todos</option>
-          {allTags.map(t => <option key={t} value={t}>{t}</option>)}
-        </select>
+        {/* Custom Modern Searchable Tag Dropdown */}
+        <div className="relative" ref={tagDropdownRef}>
+          <button
+            type="button"
+            onClick={() => setIsTagDropdownOpen(!isTagDropdownOpen)}
+            className={`h-9 px-3 rounded-md border text-sm font-medium transition-all flex items-center gap-2 cursor-pointer ${
+              filterTag !== "Todos"
+                ? "bg-[var(--color-surface)] border-[var(--color-brand)] text-[var(--color-brand)] ring-1 ring-[var(--color-brand)]/30"
+                : "bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text)] hover:border-[var(--color-border-hover)]"
+            }`}
+          >
+            <Tag className="w-3.5 h-3.5 opacity-70" />
+            <span className="truncate max-w-[150px]">
+              {filterTag === "Todos" ? "Tag: Todas" : filterTag}
+            </span>
+            {filterTag !== "Todos" && (
+              <span
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setFilterTag("Todos")
+                }}
+                className="p-0.5 hover:bg-white/10 rounded-full"
+                title="Limpar tag"
+              >
+                <X className="w-3 h-3" />
+              </span>
+            )}
+            <ChevronDown className={`w-3.5 h-3.5 opacity-60 transition-transform ${isTagDropdownOpen ? "rotate-180" : ""}`} />
+          </button>
+
+          {/* Dropdown Popover */}
+          {isTagDropdownOpen && (
+            <div className="absolute left-0 mt-1.5 w-72 max-h-80 bg-[#1a1d23] border border-[#2e333d] rounded-xl shadow-2xl z-50 flex flex-col overflow-hidden animate-in fade-in slide-in-from-top-1 duration-150">
+              <div className="p-2 border-b border-[#2e333d] bg-[#16181d]">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)]" />
+                  <input
+                    type="text"
+                    placeholder="Pesquisar tag..."
+                    value={tagSearchTerm}
+                    onChange={(e) => setTagSearchTerm(e.target.value)}
+                    className="w-full bg-[#22262f] border border-[#383e4a] rounded-lg pl-8 pr-2.5 py-1.5 text-xs text-white placeholder:text-[#6b7280] focus:outline-none focus:border-[var(--color-brand)]"
+                    autoFocus
+                  />
+                </div>
+              </div>
+
+              <div className="overflow-y-auto flex-1 p-1 divide-y divide-white/5 scrollbar-thin">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFilterTag("Todos")
+                    setIsTagDropdownOpen(false)
+                    setTagSearchTerm("")
+                  }}
+                  className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer ${
+                    filterTag === "Todos" ? "bg-[var(--color-brand)]/20 text-[var(--color-brand)] font-semibold" : "text-gray-300 hover:bg-[#252a34]"
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gray-400" />
+                    Todas as tags
+                  </span>
+                  <span className="text-[10px] opacity-60 bg-white/5 px-1.5 py-0.5 rounded font-mono">{mediaItems.length}</span>
+                </button>
+
+                {filteredDropdownTags.map((tag) => {
+                  const count = tagCounts[tag] || 0
+                  const color = colors[tag] || "#64748b"
+                  const isSelected = filterTag === tag
+                  return (
+                    <button
+                      key={tag}
+                      type="button"
+                      onClick={() => {
+                        setFilterTag(tag)
+                        setIsTagDropdownOpen(false)
+                        setTagSearchTerm("")
+                      }}
+                      className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs transition-colors text-left cursor-pointer ${
+                        isSelected ? "bg-[var(--color-brand)]/20 text-[var(--color-brand)] font-semibold" : "text-gray-300 hover:bg-[#252a34]"
+                      }`}
+                    >
+                      <span className="flex items-center gap-2 truncate pr-2">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                        <span className="truncate">{tag}</span>
+                      </span>
+                      <span className="text-[10px] opacity-60 bg-white/5 px-1.5 py-0.5 rounded shrink-0 font-mono">{count}</span>
+                    </button>
+                  )
+                })}
+
+                {filteredDropdownTags.length === 0 && (
+                  <div className="py-4 text-center text-xs text-[var(--color-text-muted)]">
+                    Nenhuma tag encontrada
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
         <button
           onClick={() => setFilterFavorite(!filterFavorite)}
-          className={`px-3 py-2 rounded-md border text-sm font-medium transition-colors flex items-center gap-1.5 ${filterFavorite ? 'bg-[var(--color-brand)]/10 text-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-white'}`}
+          className={`px-3 py-2 rounded-md border text-sm font-medium transition-colors flex items-center gap-1.5 cursor-pointer ${filterFavorite ? 'bg-[var(--color-brand)]/10 text-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-muted)] hover:text-white'}`}
         >
           <Star className={`w-4 h-4 ${filterFavorite ? 'fill-[var(--color-brand)]' : ''}`} />
           Favoritos
         </button>
       </div>
+
+      {/* Quick Tags Chips Bar */}
+      <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none text-xs">
+        <span className="text-[11px] text-[var(--color-text-muted)] font-medium uppercase tracking-wider shrink-0 mr-1 flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-[var(--color-brand)]" /> Tags:
+        </span>
+        <button
+          type="button"
+          onClick={() => setFilterTag("Todos")}
+          className={`shrink-0 px-2.5 py-1 rounded-full text-xs transition-all cursor-pointer ${
+            filterTag === "Todos"
+              ? "bg-[var(--color-brand)] text-white font-medium shadow-sm"
+              : "bg-[#252a34] text-gray-400 hover:text-white hover:bg-[#2e3442] border border-white/5"
+          }`}
+        >
+          Todas ({mediaItems.length})
+        </button>
+        {popularQuickTags.map((tag) => {
+          const isSelected = filterTag === tag
+          const color = colors[tag] || "#94a3b8"
+          const count = tagCounts[tag] || 0
+          return (
+            <button
+              key={tag}
+              type="button"
+              onClick={() => setFilterTag(isSelected ? "Todos" : tag)}
+              className={`shrink-0 px-2.5 py-1 rounded-full text-xs transition-all flex items-center gap-1.5 border cursor-pointer ${
+                isSelected
+                  ? "text-white font-medium shadow-sm border-transparent"
+                  : "bg-[#1f232a] text-gray-300 hover:text-white hover:bg-[#2a303c] border-white/5"
+              }`}
+              style={isSelected ? { backgroundColor: color } : {}}
+            >
+              <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: isSelected ? "#fff" : color }} />
+              <span>{tag}</span>
+              <span className={`text-[10px] px-1 rounded-full ${isSelected ? "bg-black/30" : "bg-white/10 opacity-70"}`}>{count}</span>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Filter Status and Result Count */}
+      <div className="flex items-center justify-between text-xs text-[var(--color-text-muted)] pt-0.5">
+        <div>
+          Exibindo <strong className="text-white">{filtered.length}</strong> de {mediaItems.length} mídias
+          {filterTag !== "Todos" && <span> • Tag: <strong className="text-[var(--color-brand)]">{filterTag}</strong></span>}
+          {filterNiche !== "Todos" && <span> • Nicho: <strong className="text-white">{filterNiche}</strong></span>}
+          {filterCategory !== "Todos" && <span> • Categoria: <strong className="text-white">{filterCategory}</strong></span>}
+        </div>
+        {hasActiveFilters && (
+          <button
+            type="button"
+            onClick={clearAllFilters}
+            className="flex items-center gap-1 text-[var(--color-brand)] hover:underline cursor-pointer"
+          >
+            <RotateCcw className="w-3 h-3" /> Limpar todos os filtros
+          </button>
+        )}
+      </div>
+
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {filtered.map((media) => (
