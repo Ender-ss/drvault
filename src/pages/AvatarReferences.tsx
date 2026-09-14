@@ -169,7 +169,7 @@ export default function AvatarReferences() {
         id: `avatar-custom-${Date.now()}`,
         title: formTitle,
         driveLink: formDriveLink || GDRIVE_FOLDER_URL,
-        thumbUrl: formThumbUrl || "/avatars/tom_hanks.png",
+        thumbUrl: formThumbUrl || "/avatar-images/tom_hanks.png",
         niche: formNiche,
         category: "avatar",
         tags: parsedTags.length > 0 ? parsedTags : ["Avatar", "Referência"],
@@ -472,7 +472,7 @@ export default function AvatarReferences() {
                 referrerPolicy="no-referrer"
                 loading="lazy"
                 onError={(e) => { 
-                  (e.target as HTMLImageElement).src = '/avatars/tom_hanks.png' 
+                  (e.target as HTMLImageElement).src = '/avatar-images/tom_hanks.png' 
                 }}
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100" 
               />
@@ -606,7 +606,7 @@ export default function AvatarReferences() {
                 <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Thumbnail / Imagem de Referência</label>
                 <div className="flex gap-2 mb-2">
                   <Input 
-                    placeholder="URL da imagem (/avatars/...) ou faça upload" 
+                    placeholder="URL da imagem (/avatar-images/...) ou faça upload" 
                     value={formThumbUrl} 
                     onChange={e => setFormThumbUrl(e.target.value)} 
                     className="flex-1"
