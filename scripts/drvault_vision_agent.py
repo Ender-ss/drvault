@@ -120,20 +120,22 @@ def load_and_optimize_image(thumb_url, drive_link=None):
         if img is None:
             return None
 
-        # Converte para RGB e redimensiona para 512px máx
+        # Converte para RGB e redimensiona para 384px máx (ultra-rápido, ~15KB)
         img = img.convert("RGB")
-        img.thumbnail((512, 512), Image.Resampling.LANCZOS)
+        img.thumbnail((384, 384), Image.Resampling.LANCZOS)
         buf = io.BytesIO()
-        img.save(buf, format="JPEG", quality=85)
+        img.save(buf, format="JPEG", quality=80)
         return base64.b64encode(buf.getvalue()).decode("utf-8")
 
     except Exception as e:
         print(f"Erro ao carregar imagem ({thumb_url}): {e}")
         return None
 
+FALLBACK_MODELS = ["gemini-3.5-flash", "gemini-3-flash-preview", "gemini-flash-lite-latest"]
+
 def analyze_image_with_gemini(img_b64):
     """
-    Envia a imagem para a API Gemini com retry em caso de indisponibilidade temporária.
+    Envia a imagem para a API Gemini com fallback automático entre modelos.
     """
     payload = {
         "contents": [{
@@ -153,10 +155,10 @@ def analyze_image_with_gemini(img_b64):
         }
     }
 
-    max_retries = 3
-    for attempt in range(max_retries):
+    for model_name in FALLBACK_MODELS:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={API_KEY}"
         try:
-            r = requests.post(GEMINI_URL, json=payload, timeout=25)
+            r = requests.post(url, json=payload, timeout=45)
             if r.status_code == 200:
                 data = r.json()
                 text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
@@ -166,15 +168,14 @@ def analyze_image_with_gemini(img_b64):
                     text = re.sub(r"\n```$", "", text)
                 return json.loads(text)
             elif r.status_code in [429, 503]:
-                wait_time = 15 * (attempt + 1)
-                print(f"[Rate Limit / 503] Aguardando {wait_time}s antes de retentar...")
-                time.sleep(wait_time)
+                print(f"[{model_name} {r.status_code}] Alternando para próximo modelo...")
+                time.sleep(2)
+                continue
             else:
-                print(f"[Erro Gemini {r.status_code}]: {r.text[:200]}")
-                return None
+                print(f"[{model_name} Erro {r.status_code}]: {r.text[:150]}")
         except Exception as e:
-            print(f"[Tentativa {attempt+1} Exceção]: {e}")
-            time.sleep(5)
+            print(f"[{model_name} Exceção/Timeout]: {e}")
+            time.sleep(2)
 
     return None
 
