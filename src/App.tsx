@@ -10,6 +10,7 @@ import MartinsSpy from "./pages/MartinsSpy"
 import CopiesList from "./pages/CopiesList"
 import CopyDetail from "./pages/CopyDetail"
 import Library from "./pages/Library"
+import AvatarReferences from "./pages/AvatarReferences"
 import AdTypes from "./pages/AdTypes"
 import HooksPage from "./pages/HooksPage"
 import Templates from "./pages/Templates"
@@ -34,6 +35,8 @@ function App() {
             <Route path="/copies" element={<CopiesList />} />
             <Route path="/copies/:id" element={<CopyDetail />} />
             <Route path="/library" element={<Library />} />
+            <Route path="/avatars" element={<AvatarReferences />} />
+            <Route path="/avatar-references" element={<Navigate to="/avatars" replace />} />
             <Route path="/ad-types" element={<AdTypes />} />
             <Route path="/hooks-library" element={<HooksPage />} />
             <Route path="/templates" element={<Templates />} />

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom"
-import { LayoutDashboard, FileText, Library, Folder, Settings, Youtube, Anchor, LogOut, Flame } from "lucide-react"
+import { LayoutDashboard, FileText, Library, Folder, Settings, Youtube, Anchor, LogOut, Flame, Users } from "lucide-react"
 import { cn } from "../../lib/utils"
 import { useAuth } from "../../contexts/AuthContext"
 
@@ -8,11 +8,13 @@ const navItems = [
   { name: "Martins Spy", href: "/spy", icon: Flame },
   { name: "Copies", href: "/copies", icon: FileText },
   { name: "Biblioteca", href: "/library", icon: Library },
+  { name: "Referências Avatares", href: "/avatars", icon: Users },
   { name: "Tipos de Ads", href: "/ad-types", icon: Youtube },
   { name: "Hooks Library", href: "/hooks-library", icon: Anchor },
   { name: "Modelos", href: "/templates", icon: Folder },
   { name: "Configurações", href: "/settings", icon: Settings },
 ]
+
 
 export function Sidebar() {
   const location = useLocation()
