@@ -1,0 +1,470 @@
+[
+  {
+    "id": "avatar-gina",
+    "title": "Gina Rodriguez / Carano",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/gina.png",
+    "niche": "Feminino 30+",
+    "category": "avatar",
+    "tags": [
+      "Celebridade",
+      "Atriz",
+      "Autoridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-yellowstone_velho",
+    "title": "Yellowstone / Cowboy",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/yellowstone_velho.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Cowboy",
+      "Autoridade",
+      "Masculino"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-tom_hanks",
+    "title": "Tom Hanks",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/tom_hanks.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Celebridade",
+      "Autoridade",
+      "Cinema"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-serena",
+    "title": "Serena Williams",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/serena.png",
+    "niche": "Feminino 30+",
+    "category": "avatar",
+    "tags": [
+      "Celebridade",
+      "Atleta",
+      "Autoridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-rincon",
+    "title": "Rincon Agro",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/rincon.png",
+    "niche": "Masculino 30+",
+    "category": "avatar",
+    "tags": [
+      "Agro",
+      "Cowboy",
+      "Masculino"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-phil_falando",
+    "title": "Dr. Phil Falando",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/phil_falando.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Dr. Phil",
+      "Especialista",
+      "Autoridade Médica"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-oprah",
+    "title": "Oprah Winfrey",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/oprah.png",
+    "niche": "Feminino 50+",
+    "category": "avatar",
+    "tags": [
+      "Oprah",
+      "Celebridade",
+      "Apresentadora"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-mulher_com_bb_1",
+    "title": "Mulher com Bebê 1",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/mulher_com_bb_1.png",
+    "niche": "Feminino 20+",
+    "category": "avatar",
+    "tags": [
+      "Depoimento",
+      "Maternidade",
+      "UGC"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-mule",
+    "title": "Mulher Meia-Idade Loira",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/mule.png",
+    "niche": "Feminino 40+",
+    "category": "avatar",
+    "tags": [
+      "Depoimento",
+      "UGC",
+      "Mulher 40+"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-morgan",
+    "title": "Morgan Freeman",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/morgan.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Celebridade",
+      "Autoridade",
+      "Voz Marcante"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-meryl_streep",
+    "title": "Meryl Streep",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/meryl_streep.png",
+    "niche": "Feminino 50+",
+    "category": "avatar",
+    "tags": [
+      "Celebridade",
+      "Atriz",
+      "Autoridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-mendel_baking",
+    "title": "Dr. Mendel (Baking Soda)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/mendel_baking.png",
+    "niche": "Masculino 40+",
+    "category": "avatar",
+    "tags": [
+      "Especialista",
+      "Baking Soda",
+      "Autoridade Médica"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-mel_gibson",
+    "title": "Mel Gibson",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/mel_gibson.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Celebridade",
+      "Autoridade",
+      "Cinema"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-mark_cuban",
+    "title": "Mark Cuban",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/mark_cuban.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Mark Cuban",
+      "Shark Tank",
+      "Bilionário",
+      "Autoridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-loire_1",
+    "title": "Mulher Loira com Óculos",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/loire_1.png",
+    "niche": "Feminino 40+",
+    "category": "avatar",
+    "tags": [
+      "Especialista",
+      "Depoimento",
+      "UGC"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-jenifer_ashton",
+    "title": "Dra. Jennifer Ashton",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/jenifer_ashton.png",
+    "niche": "Feminino 40+",
+    "category": "avatar",
+    "tags": [
+      "Especialista",
+      "Médica",
+      "ABC News",
+      "Autoridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-jelly_roll",
+    "title": "Jelly Roll",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/jelly_roll.png",
+    "niche": "Masculino 30+",
+    "category": "avatar",
+    "tags": [
+      "Jelly Roll",
+      "Celebridade",
+      "Transformação",
+      "Música"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-hoda_kotb",
+    "title": "Hoda Kotb",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/hoda_kotb.png",
+    "niche": "Feminino 50+",
+    "category": "avatar",
+    "tags": [
+      "Apresentadora",
+      "Today Show",
+      "Celebridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-helene",
+    "title": "Helene (Depoimento)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/helene.png",
+    "niche": "Feminino 30+",
+    "category": "avatar",
+    "tags": [
+      "Depoimento",
+      "UGC",
+      "Feminino"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-gupta_3",
+    "title": "Dr. Sanjay Gupta (Look 3)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/gupta_3.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Dr. Gupta",
+      "Especialista",
+      "Médico CNN"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-gupta_2",
+    "title": "Dr. Sanjay Gupta (Look 2)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/gupta_2.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Dr. Gupta",
+      "Especialista",
+      "Médico CNN"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-gupta_1",
+    "title": "Dr. Sanjay Gupta (Look 1)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/gupta_1.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Dr. Gupta",
+      "Especialista",
+      "Médico CNN"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-doutora_2",
+    "title": "Doutora / Especialista Loira",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/doutora_2.png",
+    "niche": "Feminino 30+",
+    "category": "avatar",
+    "tags": [
+      "Especialista",
+      "Médica",
+      "Saúde"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-doctor_oz_azul",
+    "title": "Dr. Oz (Camisa Azul)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/doctor_oz_azul.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Dr. Oz",
+      "Especialista",
+      "Autoridade Médica"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-billy",
+    "title": "Billy",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/billy.png",
+    "niche": "Masculino 40+",
+    "category": "avatar",
+    "tags": [
+      "Depoimento",
+      "Masculino 40+",
+      "UGC"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-ben_carson",
+    "title": "Dr. Ben Carson",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/ben_carson.png",
+    "niche": "Masculino 50+",
+    "category": "avatar",
+    "tags": [
+      "Ben Carson",
+      "Neurocirurgião",
+      "Autoridade"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-adele",
+    "title": "Adele",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/adele.png",
+    "niche": "Feminino 30+",
+    "category": "avatar",
+    "tags": [
+      "Adele",
+      "Celebridade",
+      "Transformação"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-mulher_com_bb_2",
+    "title": "Mulher com Bebê 2",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/mulher_com_bb_2.png",
+    "niche": "Feminino 20+",
+    "category": "avatar",
+    "tags": [
+      "Depoimento",
+      "Maternidade",
+      "UGC"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-kelly_clarkson",
+    "title": "Kelly Clarkson",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/kelly_clarkson.png",
+    "niche": "Feminino 40+",
+    "category": "avatar",
+    "tags": [
+      "Kelly Clarkson",
+      "Celebridade",
+      "Apresentadora"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-japonesa",
+    "title": "Avatar Asiática / Japonesa",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/japonesa.png",
+    "niche": "Feminino 40+",
+    "category": "avatar",
+    "tags": [
+      "Apresentadora",
+      "Especialista",
+      "Asiática"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  },
+  {
+    "id": "avatar-ed_1",
+    "title": "Avatar Ed (Morena)",
+    "driveLink": "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM",
+    "thumbUrl": "/avatars/ed_1.png",
+    "niche": "Feminino 20+",
+    "category": "avatar",
+    "tags": [
+      "Criadora",
+      "UGC",
+      "Jovem"
+    ],
+    "favorite": false,
+    "addedDate": "2026-09-14"
+  }
+]
