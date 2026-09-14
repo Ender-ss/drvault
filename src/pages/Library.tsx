@@ -37,6 +37,25 @@ export default function Library() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
   const [playingId, setPlayingId] = useState<string | null>(null)
+  const [agentStatus, setAgentStatus] = useState<{
+    total: number
+    processed: number
+    remaining: number
+    progress_percent: number
+    status: string
+  } | null>(null)
+
+  useEffect(() => {
+    const checkStatus = () => {
+      fetch("/vision_agent_status.json")
+        .then(r => r.ok ? r.json() : null)
+        .then(data => { if (data) setAgentStatus(data) })
+        .catch(() => {})
+    }
+    checkStatus()
+    const interval = setInterval(checkStatus, 8000)
+    return () => clearInterval(interval)
+  }, [])
 
   // Tag filter dropdown state
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false)
@@ -110,6 +129,8 @@ export default function Library() {
     const matchesSearch = searchTerm === "" ||
       m.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       m.driveLink.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (m.visualDescription && m.visualDescription.toLowerCase().includes(searchTerm.toLowerCase())) ||
+      (m.sceneSummary && m.sceneSummary.toLowerCase().includes(searchTerm.toLowerCase())) ||
       m.tags.some(t => t.toLowerCase().includes(searchTerm.toLowerCase()))
     const matchesTag = filterTag === "Todos" || m.tags.includes(filterTag)
     const matchesNiche = filterNiche === "Todos" || m.niche === filterNiche
@@ -218,7 +239,15 @@ export default function Library() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight uppercase">Biblioteca</h1>
-          <p className="text-[var(--color-text-muted)] mt-1 font-semibold">B-Rolls e Referências Visuais</p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-[var(--color-text-muted)] font-semibold text-sm">B-Rolls e Referências Visuais</p>
+            {agentStatus && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[11px] text-emerald-400 font-medium">
+                <span className={`w-1.5 h-1.5 rounded-full ${agentStatus.status === 'running' ? 'bg-emerald-400 animate-pulse' : 'bg-gray-400'}`} />
+                <span>Leitura Visual IA: <strong>{agentStatus.processed}</strong>/{agentStatus.total} ({agentStatus.progress_percent}%)</span>
+              </div>
+            )}
+          </div>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           {selectedIds.size > 0 && (
@@ -247,7 +276,7 @@ export default function Library() {
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative flex-1 min-w-[200px] max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-text-muted)]" />
-          <Input className="pl-9" placeholder="Buscar por título, tag..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          <Input className="pl-9" placeholder="Buscar por título, tag ou cena (ex: baking soda no pé)..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
         </div>
         <select
           className="bg-[var(--color-surface)] border border-[var(--color-border)] text-sm text-[var(--color-text)] rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-[var(--color-brand)]"
@@ -631,7 +660,17 @@ export default function Library() {
               )}
             </div>
             <div className="p-3 space-y-1.5 flex-grow bg-[#1f2329]">
-              <p className="text-xs font-medium text-[var(--color-text)] truncate" title={media.title}>{media.title}</p>
+              <div className="flex items-start justify-between gap-1.5">
+                <p className="text-xs font-medium text-[var(--color-text)] truncate flex-1" title={media.title}>{media.title}</p>
+                {media.visualDescription && (
+                  <span 
+                    className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-1.5 py-0.5 rounded shrink-0 cursor-help"
+                    title={`Leitura Visual IA:\n${media.visualDescription}`}
+                  >
+                    <Sparkles className="w-2.5 h-2.5" /> IA
+                  </span>
+                )}
+              </div>
               <a href={media.driveLink} target="_blank" rel="noreferrer" className="flex items-center gap-1 text-[11px] text-[var(--color-text-muted)] hover:text-white truncate">
                 <LinkIcon className="h-3 w-3 shrink-0" />
                 <span className="truncate">{media.driveLink.replace('https://', '')}</span>
@@ -788,6 +827,8 @@ export default function Library() {
           category={previewItem.category}
           thumbUrl={previewItem.thumbUrl}
           tags={previewItem.tags}
+          visualDescription={previewItem.visualDescription}
+          sceneSummary={previewItem.sceneSummary}
           hideSaveAction
         />
       )}

@@ -23,6 +23,8 @@ export interface MediaItem {
   category: string  // "broll" | "reference" | "avatar" etc
   brollType?: string
   isFavorite?: boolean
+  visualDescription?: string
+  sceneSummary?: string
 }
 
 export const mockCopies: Copy[] = [

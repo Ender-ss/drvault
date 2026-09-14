@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { X, ExternalLink, Check, Film, BookmarkPlus, Copy } from 'lucide-react'
+import { X, ExternalLink, Check, Film, BookmarkPlus, Copy, Sparkles } from 'lucide-react'
 import { parseMediaUrl } from '../../utils/embedUtils'
 import { useMediaItems } from '../../hooks/useMediaItems'
 import { Button } from '../ui/Button'
@@ -14,6 +14,8 @@ export interface MediaInspectorProps {
   category?: string
   thumbUrl?: string
   tags?: string[]
+  visualDescription?: string
+  sceneSummary?: string
   hideSaveAction?: boolean
 }
 
@@ -26,6 +28,8 @@ export function MediaInspectorModal({
   category = 'broll',
   thumbUrl = '',
   tags = ['Importado Spy'],
+  visualDescription,
+  sceneSummary,
   hideSaveAction = false
 }: MediaInspectorProps) {
   const { addMediaItem } = useMediaItems()
@@ -144,6 +148,24 @@ export function MediaInspectorModal({
             </div>
           )}
         </div>
+
+        {/* Visual AI Description Section */}
+        {visualDescription && (
+          <div className="px-6 py-3.5 bg-[#13161c] border-t border-[var(--color-border)] space-y-1.5">
+            <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span>Leitura Visual IA (Cena & Ações)</span>
+            </div>
+            <p className="text-xs text-gray-200 leading-relaxed font-normal">
+              {visualDescription}
+            </p>
+            {sceneSummary && (
+              <p className="text-[11px] text-[var(--color-text-muted)] italic">
+                Resumo: {sceneSummary}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Actions Footer */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-t border-[var(--color-border)] bg-[#1e222a]">

@@ -47,7 +47,9 @@ export function useMediaItems() {
         niche: item.niche,
         category: item.category,
         brollType: item.broll_type,
-        isFavorite: favoriteIds.has(item.id)
+        isFavorite: favoriteIds.has(item.id),
+        visualDescription: item.visual_description,
+        sceneSummary: item.scene_summary
       }))
       setMediaItems(mappedItems)
     } else {
@@ -122,7 +124,9 @@ export function useMediaItems() {
         niche: item.niche,
         tags: item.tags,
         category: item.category,
-        broll_type: item.brollType
+        broll_type: item.brollType,
+        visual_description: item.visualDescription,
+        scene_summary: item.sceneSummary
       })
       .eq('id', item.id)
 
