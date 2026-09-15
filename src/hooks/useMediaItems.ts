@@ -51,7 +51,15 @@ export function useMediaItems() {
         visualDescription: item.visual_description,
         sceneSummary: item.scene_summary
       }))
-      setMediaItems(mappedItems)
+      
+      // Keep static reference catalog available even if not yet fully migrated to DB
+      const existingLinks = new Set(mappedItems.map(i => i.driveLink.trim().toLowerCase()))
+      const existingTitles = new Set(mappedItems.map(i => i.title.trim().toLowerCase()))
+      const unseededInitials = initialMediaItems.filter(i => 
+        !existingLinks.has(i.driveLink.trim().toLowerCase()) &&
+        !existingTitles.has(i.title.trim().toLowerCase())
+      )
+      setMediaItems([...mappedItems, ...unseededInitials])
     } else {
       setMediaItems(initialMediaItems)
     }

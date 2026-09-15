@@ -1,5 +1,6 @@
 import { extractedMediaItems } from './extracted_media'
 import { extractedMediaItems2 } from './extracted_media_2'
+import { googleDocMediaItems } from './google_doc_media'
 
 export interface Copy {
   id: string
@@ -71,6 +72,7 @@ const brollNames = [
 ]
 
 export const initialMediaItems: MediaItem[] = [
+  ...googleDocMediaItems,
   ...extractedMediaItems,
   ...extractedMediaItems2,
   ...Array.from({ length: 14 }).map((_, i) => ({

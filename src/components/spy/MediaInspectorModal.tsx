@@ -100,9 +100,17 @@ export function MediaInspectorModal({
 
         {/* Player Container */}
         <div className="flex-1 bg-black flex items-center justify-center relative overflow-hidden min-h-[440px] max-h-[68vh] p-2">
-          {embedInfo.platform === 'tiktok' || embedInfo.platform === 'direct' ? (
+          {embedInfo.platform === 'tiktok' && embedInfo.videoId ? (
+            <iframe
+              src={embedInfo.embedUrl}
+              className="w-full h-full min-h-[540px] max-w-[420px] border-0 rounded-xl shadow-2xl"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              allowFullScreen
+              title={title}
+            />
+          ) : embedInfo.platform === 'direct' ? (
             <video
-              src={embedInfo.embedUrl || (embedInfo.videoId ? `/api/spy/video/${embedInfo.videoId}` : url)}
+              src={embedInfo.embedUrl || url}
               controls
               autoPlay
               playsInline
@@ -111,22 +119,22 @@ export function MediaInspectorModal({
           ) : embedInfo.platform === 'youtube' && embedInfo.videoId ? (
             <iframe
               src={embedInfo.embedUrl}
-              className="w-full h-full aspect-video border-0"
+              className="w-full h-full aspect-video border-0 rounded-xl"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
               title={title}
             />
-          ) : embedInfo.platform === 'instagram' ? (
+          ) : embedInfo.platform === 'instagram' && embedInfo.videoId ? (
             <iframe
               src={embedInfo.embedUrl}
-              className="w-full h-[580px] max-w-[400px] border-0"
+              className="w-full h-[580px] max-w-[420px] border-0 rounded-xl shadow-2xl"
               allowFullScreen
               title={title}
             />
           ) : embedInfo.platform === 'drive' && embedInfo.videoId ? (
             <iframe
               src={embedInfo.embedUrl}
-              className="w-full h-full min-h-[460px] border-0"
+              className="w-full h-full min-h-[460px] border-0 rounded-xl"
               allow="autoplay; encrypted-media; fullscreen"
               allowFullScreen
               title={title}

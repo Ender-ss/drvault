@@ -649,6 +649,9 @@ export default function Library() {
                     <button onClick={(e) => { e.stopPropagation(); navigator.clipboard.writeText(media.driveLink); }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-blue-600 transition-colors" title="Copiar Link">
                       <Copy className="w-3.5 h-3.5" />
                     </button>
+                    <button onClick={(e) => { e.stopPropagation(); setPreviewItem(media); }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-[var(--color-brand)] transition-colors" title="Assistir no Player Expandido">
+                      <Maximize2 className="w-3.5 h-3.5" />
+                    </button>
                     <button onClick={(e) => { e.stopPropagation(); openEditModal(media) }} className="p-1.5 bg-[var(--color-surface)] rounded-full hover:bg-[var(--color-brand)] transition-colors" title="Editar">
                       <Edit className="w-3.5 h-3.5" />
                     </button>

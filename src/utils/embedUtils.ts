@@ -42,7 +42,7 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
       const videoId = videoIdMatch[1]
       return {
         platform: 'tiktok',
-        embedUrl: `/api/spy/video/${videoId}`,
+        embedUrl: `https://www.tiktok.com/embed/v2/${videoId}`,
         originalUrl: cleanUrl,
         videoId
       }
@@ -81,12 +81,13 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
 
   // 4. Instagram
   if (cleanUrl.includes('instagram.com')) {
-    const match = cleanUrl.match(/\/(reel|p)\/([a-zA-Z0-9_-]+)/)
+    const match = cleanUrl.match(/\/(reel|reels|p)\/([a-zA-Z0-9_-]+)/)
     if (match && match[2]) {
+      const type = match[1] === 'p' ? 'p' : 'reel'
       const code = match[2]
       return {
         platform: 'instagram',
-        embedUrl: `https://www.instagram.com/reel/${code}/embed`,
+        embedUrl: `https://www.instagram.com/${type}/${code}/embed`,
         originalUrl: cleanUrl,
         videoId: code
       }
