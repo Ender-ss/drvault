@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react"
-import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play, Maximize2, Tag, ChevronDown, RotateCcw, Sparkles } from "lucide-react"
+import { Link as LinkIcon, Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Play, Maximize2, Tag, ChevronDown, RotateCcw, Sparkles, Film } from "lucide-react"
 
 
 import { Badge } from "../components/ui/Badge"
@@ -11,7 +11,8 @@ import { useMediaItems } from "../hooks/useMediaItems"
 import { ManageColorsModal } from "../components/editor/ManageColorsModal"
 import { BatchEditModal } from "../components/editor/BatchEditModal"
 import { MediaInspectorModal } from "../components/spy/MediaInspectorModal"
-import { parseMediaUrl } from "../utils/embedUtils"
+import { parseMediaUrl, isDirectVideoUrl } from "../utils/embedUtils"
+import { MediaHoverPreview } from "../components/ui/MediaHoverPreview"
 
 export default function Library() {
   const { 
@@ -80,12 +81,15 @@ export default function Library() {
   const [formTitle, setFormTitle] = useState("")
   const [formDriveLink, setFormDriveLink] = useState("")
   const [formThumbUrl, setFormThumbUrl] = useState("")
+  const [formPreviewUrl, setFormPreviewUrl] = useState("")
   const [formNiche, setFormNiche] = useState("")
   const [formTags, setFormTags] = useState("")
   const [formCategory, setFormCategory] = useState("broll")
   const [formBrollType, setFormBrollType] = useState("")
   const [isUploading, setIsUploading] = useState(false)
+  const [isPreviewUploading, setIsPreviewUploading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const previewFileInputRef = useRef<HTMLInputElement>(null)
 
   // Unique values and tag counts for filters
   const tagCounts = mediaItems.reduce((acc, item) => {
@@ -146,6 +150,7 @@ export default function Library() {
     setFormTitle("")
     setFormDriveLink("")
     setFormThumbUrl("")
+    setFormPreviewUrl("")
     setFormNiche("")
     setFormTags("")
     setFormCategory("broll")
@@ -158,6 +163,7 @@ export default function Library() {
     setFormTitle(item.title)
     setFormDriveLink(item.driveLink)
     setFormThumbUrl(item.thumbUrl)
+    setFormPreviewUrl(item.previewUrl || "")
     setFormNiche(item.niche)
     setFormTags(item.tags.join(", "))
     setFormCategory(item.category)
@@ -166,29 +172,33 @@ export default function Library() {
   }
 
   const handleSave = () => {
-    if (!formTitle.trim() || !formDriveLink.trim()) return
+    const finalLink = formDriveLink.trim() || formThumbUrl.trim()
+    if (!formTitle.trim() || !finalLink) return
+
     const tags = formTags.split(",").map(t => t.trim()).filter(Boolean)
     if (editingItem) {
       updateMediaItem({
         ...editingItem,
         title: formTitle,
         thumbUrl: formThumbUrl || editingItem.thumbUrl,
-        driveLink: formDriveLink,
+        driveLink: finalLink,
         niche: formNiche || "Geral",
         tags: tags.length > 0 ? tags : ["Standard"],
         category: formCategory,
-        brollType: formBrollType
+        brollType: formBrollType,
+        previewUrl: formPreviewUrl.trim() || undefined
       })
     } else {
       const newItem: MediaItem = {
-        id: `m${Date.now()}`,
+        id: `local_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         title: formTitle,
         thumbUrl: formThumbUrl || `https://picsum.photos/seed/${Date.now()}/300/400`,
-        driveLink: formDriveLink,
+        driveLink: finalLink,
         niche: formNiche || "Geral",
         tags: tags.length > 0 ? tags : ["Standard"],
         category: formCategory,
-        brollType: formBrollType
+        brollType: formBrollType,
+        previewUrl: formPreviewUrl.trim() || undefined
       }
       addMediaItem(newItem)
     }
@@ -204,11 +214,35 @@ export default function Library() {
       const url = await uploadThumbnail(file)
       if (url) {
         setFormThumbUrl(url)
+        // If title is empty, automatically suggest title based on file name
+        if (!formTitle.trim()) {
+          const rawName = file.name.replace(/\.[^/.]+$/, '').replace(/[_-]/g, ' ')
+          setFormTitle(rawName.charAt(0).toUpperCase() + rawName.slice(1))
+        }
+        // If drive link is empty, default it to the uploaded image URL
+        if (!formDriveLink.trim()) {
+          setFormDriveLink(url)
+        }
       }
     } finally {
       setIsUploading(false)
-      // Reset input
       if (fileInputRef.current) fileInputRef.current.value = ""
+    }
+  }
+
+  const handlePreviewFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setIsPreviewUploading(true)
+    try {
+      const url = await uploadThumbnail(file)
+      if (url) {
+        setFormPreviewUrl(url)
+      }
+    } finally {
+      setIsPreviewUploading(false)
+      if (previewFileInputRef.current) previewFileInputRef.current.value = ""
     }
   }
 
@@ -595,7 +629,14 @@ export default function Library() {
                   </div>
                 </div>
               ) : (
-                <>
+                <MediaHoverPreview
+                  thumbUrl={media.thumbUrl}
+                  title={media.title}
+                  driveLink={media.driveLink}
+                  previewUrl={media.previewUrl}
+                  aspectRatio="aspect-[3/4]"
+                  className="w-full h-full"
+                >
                   {/* Batch selection checkbox */}
                   <div 
                     className={`absolute top-2 left-2 z-30 w-5 h-5 rounded flex items-center justify-center border transition-colors cursor-pointer ${selectedIds.has(media.id) ? 'bg-[var(--color-brand)] border-[var(--color-brand)]' : 'bg-black/50 border-white/50 hover:border-white'}`}
@@ -604,21 +645,6 @@ export default function Library() {
                   >
                     {selectedIds.has(media.id) && <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>}
                   </div>
-
-                  <img 
-                    src={media.thumbUrl} 
-                    alt={media.title} 
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (!target.dataset.fallback) {
-                        target.dataset.fallback = "true";
-                        target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(media.title)}&background=1f2329&color=e2e8f0&size=400`;
-                      }
-                    }}
-                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity" 
-                  />
 
                   {media.isFavorite && (
                     <div className="absolute top-2 right-2 text-yellow-400 z-10 filter drop-shadow-md">
@@ -659,7 +685,7 @@ export default function Library() {
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                </>
+                </MediaHoverPreview>
               )}
             </div>
             <div className="p-3 space-y-1.5 flex-grow bg-[#1f2329]">
@@ -712,14 +738,18 @@ export default function Library() {
                 <Input placeholder="Ex: Honey pouring close-up" value={formTitle} onChange={e => setFormTitle(e.target.value)} autoFocus />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Link do Google Drive *</label>
-                <Input placeholder="https://drive.google.com/file/d/..." value={formDriveLink} onChange={e => setFormDriveLink(e.target.value)} />
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">
+                  Link do Vídeo / Google Drive {formThumbUrl ? "(Opcional se fez upload de imagem)" : "*"}
+                </label>
+                <Input placeholder="https://drive.google.com/file/d/... ou link de vídeo" value={formDriveLink} onChange={e => setFormDriveLink(e.target.value)} />
               </div>
               <div>
-                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Thumbnail (URL da imagem)</label>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">
+                  Imagem / Thumbnail {formDriveLink ? "(Opcional)" : "*"}
+                </label>
                 <div className="flex gap-2 mb-2">
                   <Input 
-                    placeholder="https://... ou faça upload" 
+                    placeholder="https://... ou faça upload da sua imagem" 
                     value={formThumbUrl} 
                     onChange={e => setFormThumbUrl(e.target.value)} 
                     className="flex-1"
@@ -740,13 +770,13 @@ export default function Library() {
                     type="button"
                   >
                     <Upload className="w-4 h-4 mr-1.5" />
-                    {isUploading ? "Enviando..." : "Upload"}
+                    {isUploading ? "Processando..." : "Upload Imagem"}
                   </Button>
                 </div>
                 
                 {formThumbUrl && (
                   <div className="relative group/thumb w-24 h-24">
-                    <div className="rounded-md overflow-hidden border border-[var(--color-border)] w-full h-full">
+                    <div className="rounded-md overflow-hidden border border-[var(--color-border)] w-full h-full bg-black/40">
                       <img src={formThumbUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { (e.target as HTMLImageElement).src = 'https://picsum.photos/seed/fallback/300/400' }} />
                     </div>
                     <button 
@@ -760,9 +790,67 @@ export default function Library() {
                   </div>
                 )}
                 {!formThumbUrl && (
-                  <p className="text-[11px] text-[var(--color-text-muted)] mt-1">Se vazio, uma imagem placeholder será gerada automaticamente.</p>
+                  <p className="text-[11px] text-[var(--color-text-muted)] mt-1">Você pode fazer upload direto de qualquer imagem do seu computador.</p>
                 )}
               </div>
+
+              {/* 3-Second GIF or Video Preview on Hover */}
+              <div>
+                <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5 flex items-center gap-1.5">
+                  <Film className="w-3.5 h-3.5 text-[var(--color-brand)]" />
+                  GIF / Preview de 3s no Hover (Opcional)
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <Input 
+                    placeholder="URL de GIF ou vídeo (ex: .gif ou .mp4)" 
+                    value={formPreviewUrl} 
+                    onChange={e => setFormPreviewUrl(e.target.value)} 
+                    className="flex-1"
+                  />
+                  <input
+                    type="file"
+                    ref={previewFileInputRef}
+                    onChange={handlePreviewFileChange}
+                    accept="image/gif,video/mp4,video/webm"
+                    className="hidden"
+                  />
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => previewFileInputRef.current?.click()}
+                    disabled={isPreviewUploading}
+                    className="shrink-0"
+                    type="button"
+                  >
+                    <Upload className="w-4 h-4 mr-1.5" />
+                    {isPreviewUploading ? "Processando..." : "Subir GIF/Vídeo"}
+                  </Button>
+                </div>
+
+                {formPreviewUrl && (
+                  <div className="relative group/prev w-24 h-24 mt-2">
+                    <div className="rounded-md overflow-hidden border border-[var(--color-brand)]/50 w-full h-full bg-black flex items-center justify-center shadow-md">
+                      {isDirectVideoUrl(formPreviewUrl) ? (
+                        <video src={formPreviewUrl} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                      ) : (
+                        <img src={formPreviewUrl} alt="Preview 3s" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <button 
+                      onClick={() => setFormPreviewUrl("")}
+                      className="absolute -top-1.5 -right-1.5 bg-red-600 text-white p-1 rounded-full opacity-0 group-hover/prev:opacity-100 transition-opacity shadow-lg"
+                      title="Remover preview"
+                      type="button"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+                <p className="text-[11px] text-[var(--color-text-muted)] mt-1">
+                  Ao passar o mouse sobre o card na biblioteca, esse GIF ou vídeo curto rodará automaticamente por 3 segundos.
+                </p>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Nicho</label>
@@ -795,7 +883,7 @@ export default function Library() {
 
             <div className="flex justify-end gap-3 pt-2">
               <Button variant="outline" onClick={() => setShowModal(false)}>Cancelar</Button>
-              <Button variant="brand" onClick={handleSave} disabled={!formTitle.trim() || !formDriveLink.trim()}>
+              <Button variant="brand" onClick={handleSave} disabled={!formTitle.trim() || (!formDriveLink.trim() && !formThumbUrl.trim())}>
                 {editingItem ? "Salvar" : "Adicionar"}
               </Button>
             </div>

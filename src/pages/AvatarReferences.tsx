@@ -459,11 +459,11 @@ export default function AvatarReferences() {
         {filtered.map((media) => (
           <div 
             key={media.id} 
-            className="bg-[#1f2329] rounded-xl overflow-hidden flex flex-col group border border-[var(--color-border)] hover:border-[var(--color-brand)]/60 transition-all relative shadow-sm hover:shadow-lg"
+            className="bg-[#1f2329] rounded-xl overflow-hidden flex flex-col group border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-all relative shadow-sm hover:shadow-xl"
           >
-            {/* Card Image Area */}
+            {/* Card Image Area (Natural 4:3 ratio to avoid face cuts, crisp upscale rendering) */}
             <div 
-              className="aspect-square bg-black relative overflow-hidden cursor-pointer flex items-center justify-center" 
+              className="aspect-[4/3] bg-zinc-950 relative overflow-hidden cursor-pointer flex items-center justify-center" 
               onClick={() => setPreviewItem(media)}
             >
               <img 
@@ -474,14 +474,14 @@ export default function AvatarReferences() {
                 onError={(e) => { 
                   (e.target as HTMLImageElement).src = '/avatar-images/tom_hanks.png' 
                 }}
-                className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300 opacity-90 group-hover:opacity-100" 
+                className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" 
               />
 
               {/* Hover overlay with zoom icon */}
               <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-                <div className="px-2.5 py-1.5 bg-black/70 backdrop-blur-sm rounded-full text-white text-[11px] font-medium flex items-center gap-1.5 shadow-lg border border-white/10">
+                <div className="px-3 py-1.5 bg-black/80 backdrop-blur-sm rounded-full text-white text-[11px] font-medium flex items-center gap-1.5 shadow-xl border border-white/10">
                   <Eye className="w-3.5 h-3.5 text-[var(--color-brand)]" />
-                  Ver Referência
+                  Ver em Tela Cheia
                 </div>
               </div>
 
@@ -489,70 +489,83 @@ export default function AvatarReferences() {
               <div className="absolute top-2 right-2 flex gap-1 z-20 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button 
                   onClick={(e) => { e.stopPropagation(); toggleLocalFavorite(media); }} 
-                  className={`p-1.5 rounded-full transition-colors ${media.isFavorite ? 'bg-amber-500 text-black' : 'bg-black/70 text-white hover:bg-black'}`}
+                  className={`p-1.5 rounded-full transition-colors ${media.isFavorite ? 'bg-amber-500 text-black' : 'bg-black/75 text-white hover:bg-black'}`}
                   title="Favoritar"
                 >
                   <Star className="w-3.5 h-3.5 fill-current" />
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleCopyText(media.id, media.title); }} 
-                  className="p-1.5 bg-black/70 text-white rounded-full hover:bg-black transition-colors" 
+                  className="p-1.5 bg-black/75 text-white rounded-full hover:bg-[var(--color-brand)] transition-colors" 
                   title="Copiar Nome da Persona"
                 >
                   {copiedId === media.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); openEditModal(media); }} 
-                  className="p-1.5 bg-black/70 text-white rounded-full hover:bg-[var(--color-brand)] transition-colors" 
+                  className="p-1.5 bg-black/75 text-white rounded-full hover:bg-[var(--color-brand)] transition-colors" 
                   title="Editar"
                 >
                   <Edit className="w-3.5 h-3.5" />
                 </button>
                 <button 
                   onClick={(e) => { e.stopPropagation(); handleDelete(media.id); }} 
-                  className="p-1.5 bg-black/70 text-white rounded-full hover:bg-red-600 transition-colors" 
+                  className="p-1.5 bg-black/75 text-white rounded-full hover:bg-red-600 transition-colors" 
                   title="Excluir"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
               </div>
 
-              {/* Persona Badge */}
-              <div className="absolute bottom-2 left-2 z-10">
-                <span className="px-2 py-0.5 bg-black/70 backdrop-blur-md rounded text-[10px] font-medium text-gray-200 border border-white/10">
+              {/* Persona Badges & HD indicator */}
+              <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1">
+                <span className="px-2 py-0.5 bg-black/80 backdrop-blur-md rounded text-[10px] font-semibold text-gray-200 border border-white/10">
                   {media.niche}
+                </span>
+                <span className="px-1.5 py-0.5 bg-emerald-500/20 backdrop-blur-md rounded text-[9px] font-bold text-emerald-300 border border-emerald-500/30">
+                  HD
                 </span>
               </div>
             </div>
 
-            {/* Card Content Area */}
+            {/* Card Content Area - No need to click into modal for basic usage */}
             <div className="p-3 space-y-2 flex-grow bg-[#1f2329] flex flex-col justify-between">
               <div>
-                <p 
-                  className="text-xs font-bold text-white group-hover:text-[var(--color-brand)] transition-colors line-clamp-1 cursor-pointer"
-                  title={media.title}
-                  onClick={() => setPreviewItem(media)}
-                >
-                  {media.title}
-                </p>
+                <div className="flex items-center justify-between gap-1">
+                  <p 
+                    className="text-xs font-bold text-white group-hover:text-[var(--color-brand)] transition-colors line-clamp-1 cursor-pointer flex-1"
+                    title={media.title}
+                    onClick={() => setPreviewItem(media)}
+                  >
+                    {media.title}
+                  </p>
+                  <button 
+                    onClick={(e) => { e.stopPropagation(); handleCopyText(media.id, media.title); }} 
+                    className="p-1 text-gray-400 hover:text-white hover:bg-white/10 rounded transition-colors shrink-0" 
+                    title="Copiar nome da persona"
+                  >
+                    {copiedId === media.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                  </button>
+                </div>
+
                 <a 
                   href={media.driveLink} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="flex items-center gap-1 text-[10px] text-[var(--color-text-muted)] hover:text-white truncate mt-0.5"
+                  className="inline-flex items-center gap-1.5 text-[11px] text-emerald-400 hover:text-emerald-300 font-medium mt-1 transition-colors"
                 >
-                  <ExternalLink className="h-2.5 w-2.5 shrink-0 text-emerald-400" />
-                  <span className="truncate">Abrir no Google Drive</span>
+                  <ExternalLink className="h-3 w-3 shrink-0" />
+                  <span>Abrir no Google Drive</span>
                 </a>
               </div>
 
-              <div className="flex gap-1 flex-wrap pt-1 border-t border-[var(--color-border)]/50">
+              <div className="flex gap-1 flex-wrap pt-2 border-t border-[var(--color-border)]/50">
                 {media.tags.slice(0, 3).map(tag => (
                   <Badge 
                     key={tag} 
                     variant="outline" 
                     colorHex={colors[tag] || '#3b82f6'} 
-                    className="text-[9px] py-0 px-1.5 rounded cursor-pointer"
+                    className="text-[9px] py-0 px-1.5 rounded cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={(e) => {
                       e.stopPropagation()
                       setFilterTag(tag)

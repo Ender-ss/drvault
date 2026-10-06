@@ -141,3 +141,35 @@ export function parseMediaUrl(url: string): MediaEmbedInfo {
     originalUrl: cleanUrl
   }
 }
+
+export function isDirectVideoUrl(url?: string): boolean {
+  if (!url) return false
+  const clean = url.trim().toLowerCase()
+  return (
+    clean.endsWith('.mp4') ||
+    clean.endsWith('.webm') ||
+    clean.endsWith('.ogg') ||
+    clean.endsWith('.mov') ||
+    clean.includes('.mp4?') ||
+    clean.includes('.webm?') ||
+    clean.includes('.mov?') ||
+    clean.includes('fbcdn.net') ||
+    clean.includes('tiktokcdn.com') ||
+    clean.includes('akamaized.net') ||
+    clean.startsWith('data:video/') ||
+    clean.startsWith('blob:')
+  )
+}
+
+export function isAnimatedMediaUrl(url?: string): boolean {
+  if (!url) return false
+  const clean = url.trim().toLowerCase()
+  return (
+    clean.endsWith('.gif') ||
+    clean.includes('.gif?') ||
+    clean.includes('giphy.com') ||
+    clean.includes('tenor.com') ||
+    clean.startsWith('data:image/gif')
+  )
+}
+

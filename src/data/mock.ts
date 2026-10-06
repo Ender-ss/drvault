@@ -26,6 +26,7 @@ export interface MediaItem {
   isFavorite?: boolean
   visualDescription?: string
   sceneSummary?: string
+  previewUrl?: string // Optional GIF or 3s video preview URL
 }
 
 export const mockCopies: Copy[] = [
