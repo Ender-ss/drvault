@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
-import { Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Tag, ChevronDown, RotateCcw, ExternalLink, Users, Eye, Check } from "lucide-react"
+import { Search, Plus, X, Edit, Trash2, Star, Copy, Upload, Tag, ChevronDown, RotateCcw, ExternalLink, Users, Eye, Check, ZoomIn, ZoomOut, Download, Maximize2, Minimize2 } from "lucide-react"
+
 import { Badge } from "../components/ui/Badge"
 import { Button } from "../components/ui/Button"
 import { Input } from "../components/ui/Input"
@@ -9,6 +10,14 @@ import { useMediaItems } from "../hooks/useMediaItems"
 import driveAvatarsData from "../data/driveAvatars.json"
 
 const GDRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/11vOlr-f1KTr0zv8hxUglAX7p5WaGXXLM"
+const AVATAR_CACHE_KEY = "v=20261006_hd4"
+
+const getAvatarUrl = (url: string) => {
+  if (!url) return url
+  const separator = url.includes("?") ? "&" : "?"
+  return `${url}${separator}${AVATAR_CACHE_KEY}`
+}
+
 
 export default function AvatarReferences() {
   const { 
@@ -46,7 +55,15 @@ export default function AvatarReferences() {
   const [showModal, setShowModal] = useState(false)
   const [editingItem, setEditingItem] = useState<MediaItem | null>(null)
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null)
+  const [zoomLevel, setZoomLevel] = useState(1)
+  const [isFullscreen, setIsFullscreen] = useState(false)
   const [copiedId, setCopiedId] = useState<string | null>(null)
+
+  useEffect(() => {
+    setZoomLevel(1)
+    setIsFullscreen(false)
+  }, [previewItem])
+
 
   // Tag filter dropdown state
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false)
@@ -467,12 +484,12 @@ export default function AvatarReferences() {
               onClick={() => setPreviewItem(media)}
             >
               <img 
-                src={media.thumbUrl} 
+                src={getAvatarUrl(media.thumbUrl)} 
                 alt={media.title} 
                 referrerPolicy="no-referrer"
                 loading="lazy"
                 onError={(e) => { 
-                  (e.target as HTMLImageElement).src = '/avatar-images/tom_hanks.png' 
+                  (e.target as HTMLImageElement).src = getAvatarUrl('/avatar-images/tom_hanks.png') 
                 }}
                 className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300" 
               />
@@ -668,40 +685,92 @@ export default function AvatarReferences() {
       {/* Image Inspector / Zoom Modal */}
       {previewItem && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200" 
-          onClick={() => setPreviewItem(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md p-2 sm:p-4 animate-in fade-in duration-200" 
+          onClick={() => { setPreviewItem(null); setZoomLevel(1); setIsFullscreen(false); }}
         >
           <div 
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]" 
+            className={`bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl overflow-hidden flex flex-col transition-all duration-300 ${
+              isFullscreen ? 'w-full h-full max-w-none max-h-none rounded-none' : 'w-full max-w-5xl max-h-[94vh]'
+            }`} 
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
-            <div className="p-4 border-b border-[var(--color-border)] flex items-center justify-between bg-[#17191d]">
+            <div className="p-3.5 sm:p-4 border-b border-[var(--color-border)] flex items-center justify-between bg-[#17191d] shrink-0">
               <div className="flex items-center gap-2.5">
                 <Users className="w-5 h-5 text-[var(--color-brand)]" />
                 <div>
                   <div className="flex items-center gap-2">
                     <h3 className="text-base font-bold text-white">{previewItem.title}</h3>
                     <span className="px-1.5 py-0.5 bg-emerald-500/20 rounded text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
-                      ALTA DEFINIÇÃO
+                      ULTRA HD
                     </span>
                   </div>
                   <span className="text-xs text-[var(--color-text-muted)]">{previewItem.niche}</span>
                 </div>
               </div>
+
               <div className="flex items-center gap-2">
+                {/* Zoom controls */}
+                <div className="hidden sm:flex items-center bg-black/60 rounded-lg p-0.5 border border-white/10 mr-1">
+                  <button
+                    onClick={() => setZoomLevel(prev => Math.max(0.75, Number((prev - 0.25).toFixed(2))))}
+                    className="p-1.5 text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors"
+                    title="Reduzir zoom"
+                  >
+                    <ZoomOut className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="text-[11px] font-mono px-2 text-gray-300 select-none">
+                    {Math.round(zoomLevel * 100)}%
+                  </span>
+                  <button
+                    onClick={() => setZoomLevel(prev => Math.min(3, Number((prev + 0.25).toFixed(2))))}
+                    className="p-1.5 text-gray-300 hover:text-white hover:bg-white/10 rounded transition-colors"
+                    title="Aumentar zoom"
+                  >
+                    <ZoomIn className="w-3.5 h-3.5" />
+                  </button>
+                  {zoomLevel !== 1 && (
+                    <button
+                      onClick={() => setZoomLevel(1)}
+                      className="text-[10px] text-[var(--color-brand)] px-2 py-1 hover:underline"
+                      title="Resetar para tamanho da tela"
+                    >
+                      Reset
+                    </button>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => setIsFullscreen(!isFullscreen)}
+                  className="p-1.5 text-gray-300 hover:text-white hover:bg-white/10 rounded-lg border border-white/10 transition-colors"
+                  title={isFullscreen ? "Sair da Tela Cheia" : "Tela Cheia"}
+                >
+                  {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </button>
+
                 <a
-                  href={previewItem.thumbUrl}
+                  href={getAvatarUrl(previewItem.thumbUrl)}
+                  download={`${previewItem.title.replace(/\s+/g, '_')}_HD.png`}
+                  className="px-3 py-1.5 bg-black/60 hover:bg-black/90 text-xs text-gray-200 hover:text-white rounded-lg border border-white/10 flex items-center gap-1.5 transition-colors"
+                  title="Baixar imagem em resolução máxima"
+                >
+                  <Download className="w-3.5 h-3.5 text-emerald-400" />
+                  <span className="hidden sm:inline">Baixar HD</span>
+                </a>
+
+                <a
+                  href={getAvatarUrl(previewItem.thumbUrl)}
                   target="_blank"
                   rel="noreferrer"
                   className="px-3 py-1.5 bg-black/60 hover:bg-black/90 text-xs text-gray-200 hover:text-white rounded-lg border border-white/10 flex items-center gap-1.5 transition-colors"
-                  title="Abrir imagem original em nova aba"
+                  title="Abrir imagem em tamanho real em nova aba"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  <span>Imagem Original</span>
+                  <span className="hidden sm:inline">Imagem Original</span>
                 </a>
+
                 <button 
-                  onClick={() => setPreviewItem(null)} 
+                  onClick={() => { setPreviewItem(null); setZoomLevel(1); setIsFullscreen(false); }} 
                   className="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                   title="Fechar (Esc)"
                 >
@@ -710,17 +779,35 @@ export default function AvatarReferences() {
               </div>
             </div>
 
-            {/* Modal Body / Image Zoom */}
-            <div className="flex-1 bg-black/95 p-4 sm:p-6 flex items-center justify-center min-h-[440px] max-h-[72vh] overflow-hidden relative group">
-              <img 
-                src={previewItem.thumbUrl} 
-                alt={previewItem.title} 
-                className="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-2xl border border-white/10 select-none"
-              />
+            {/* Modal Body / Image Zoom Stage */}
+            <div 
+              className={`flex-1 bg-zinc-950 p-2 sm:p-6 flex items-center justify-center overflow-auto relative select-none ${
+                isFullscreen ? 'h-[calc(100vh-140px)]' : 'min-h-[500px] max-h-[78vh]'
+              }`}
+            >
+              <div 
+                className="relative transition-transform duration-200 ease-out flex items-center justify-center w-full h-full"
+                style={{ transform: `scale(${zoomLevel})` }}
+              >
+                <img 
+                  src={getAvatarUrl(previewItem.thumbUrl)} 
+                  alt={previewItem.title} 
+                  onClick={() => setZoomLevel(prev => prev === 1 ? 1.75 : 1)}
+                  className={`max-h-[74vh] max-w-full w-auto object-contain rounded-xl shadow-2xl border border-white/10 ${
+                    zoomLevel === 1 ? 'cursor-zoom-in' : 'cursor-zoom-out'
+                  } transition-shadow duration-300 hover:shadow-[0_0_50px_rgba(0,0,0,0.8)]`}
+                  title="Clique na imagem para aproximar / afastar"
+                />
+              </div>
+
+              {/* Floating hint */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 pointer-events-none bg-black/75 backdrop-blur-sm border border-white/10 px-3.5 py-1 rounded-full text-[11px] text-gray-300 shadow-lg">
+                {zoomLevel === 1 ? "💡 Clique na foto para dar zoom (175%)" : `Zoom: ${Math.round(zoomLevel * 100)}% (Clique para ajustar à tela)`}
+              </div>
             </div>
 
             {/* Modal Footer / Details & Actions */}
-            <div className="p-4 bg-[#17191d] border-t border-[var(--color-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="p-3.5 sm:p-4 bg-[#17191d] border-t border-[var(--color-border)] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shrink-0">
               <div className="flex flex-wrap gap-1.5 items-center">
                 {previewItem.tags.map(tag => (
                   <Badge 
@@ -751,7 +838,7 @@ export default function AvatarReferences() {
                   className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs text-white font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
-                  Abrir no Google Drive
+                  Abrir Pasta Google Drive
                 </a>
               </div>
             </div>
