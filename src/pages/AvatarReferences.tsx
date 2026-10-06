@@ -461,9 +461,9 @@ export default function AvatarReferences() {
             key={media.id} 
             className="bg-[#1f2329] rounded-xl overflow-hidden flex flex-col group border border-[var(--color-border)] hover:border-[var(--color-brand)] transition-all relative shadow-sm hover:shadow-xl"
           >
-            {/* Card Image Area (Natural 4:3 ratio to avoid face cuts, crisp upscale rendering) */}
+            {/* Card Image Area (Portrait 3:4 for natural framing and zero face cuts) */}
             <div 
-              className="aspect-[4/3] bg-zinc-950 relative overflow-hidden cursor-pointer flex items-center justify-center" 
+              className="aspect-[3/4] bg-zinc-950 relative overflow-hidden cursor-pointer flex items-center justify-center" 
               onClick={() => setPreviewItem(media)}
             >
               <img 
@@ -668,11 +668,11 @@ export default function AvatarReferences() {
       {/* Image Inspector / Zoom Modal */}
       {previewItem && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md p-4" 
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200" 
           onClick={() => setPreviewItem(null)}
         >
           <div 
-            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]" 
+            className="bg-[var(--color-surface)] border border-[var(--color-border)] rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[92vh]" 
             onClick={e => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -680,24 +680,42 @@ export default function AvatarReferences() {
               <div className="flex items-center gap-2.5">
                 <Users className="w-5 h-5 text-[var(--color-brand)]" />
                 <div>
-                  <h3 className="text-sm font-bold text-white">{previewItem.title}</h3>
-                  <span className="text-[11px] text-[var(--color-text-muted)]">{previewItem.niche}</span>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-white">{previewItem.title}</h3>
+                    <span className="px-1.5 py-0.5 bg-emerald-500/20 rounded text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                      ALTA DEFINIÇÃO
+                    </span>
+                  </div>
+                  <span className="text-xs text-[var(--color-text-muted)]">{previewItem.niche}</span>
                 </div>
               </div>
-              <button 
-                onClick={() => setPreviewItem(null)} 
-                className="text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewItem.thumbUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1.5 bg-black/60 hover:bg-black/90 text-xs text-gray-200 hover:text-white rounded-lg border border-white/10 flex items-center gap-1.5 transition-colors"
+                  title="Abrir imagem original em nova aba"
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                  <span>Imagem Original</span>
+                </a>
+                <button 
+                  onClick={() => setPreviewItem(null)} 
+                  className="text-gray-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
+                  title="Fechar (Esc)"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Modal Body / Image Zoom */}
-            <div className="flex-1 bg-black/90 p-6 flex items-center justify-center min-h-[350px] overflow-hidden">
+            <div className="flex-1 bg-black/95 p-4 sm:p-6 flex items-center justify-center min-h-[440px] max-h-[72vh] overflow-hidden relative group">
               <img 
                 src={previewItem.thumbUrl} 
                 alt={previewItem.title} 
-                className="max-h-[60vh] max-w-full object-contain rounded-lg shadow-2xl border border-white/10"
+                className="max-h-[70vh] w-auto max-w-full object-contain rounded-xl shadow-2xl border border-white/10 select-none"
               />
             </div>
 
@@ -720,7 +738,7 @@ export default function AvatarReferences() {
                 <button
                   type="button"
                   onClick={() => handleCopyText(previewItem.id, previewItem.title)}
-                  className="px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs text-white rounded-lg flex items-center gap-1.5 transition-colors"
+                  className="px-3.5 py-2 bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-border)] text-xs text-white rounded-lg flex items-center gap-1.5 transition-colors font-medium"
                 >
                   {copiedId === previewItem.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   {copiedId === previewItem.id ? "Copiado!" : "Copiar Nome"}
@@ -730,7 +748,7 @@ export default function AvatarReferences() {
                   href={previewItem.driveLink}
                   target="_blank"
                   rel="noreferrer"
-                  className="px-3.5 py-1.5 bg-[var(--color-brand)] hover:bg-[var(--color-brand)]/90 text-xs text-white font-medium rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-xs text-white font-semibold rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
                 >
                   <ExternalLink className="w-3.5 h-3.5" />
                   Abrir no Google Drive
